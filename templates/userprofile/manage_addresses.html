@@ -1,0 +1,222 @@
+{% extends 'userprofile/user_base.html' %}
+{% load static %}
+{% block style %}
+<style>
+       .profile-main-content {
+            padding: 2rem;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            min-width: 100vh;
+            margin-left: 70px;
+            height: auto;
+        }
+
+        .content-title {
+            color: #1e293b;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .address-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .address-item {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .address-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .address-type {
+            color: #2563eb;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .address-text {
+            color: #4b5563;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 1.25rem;
+        }
+
+        .btn-action {
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background-color: #ffffff;
+            color: #2563eb;
+            border: 1px solid #2563eb;
+            margin-right: 0.75rem;
+        }
+
+        .btn-edit:hover {
+            background-color: #2563eb;
+            color: #ffffff;
+        }
+
+        .btn-delete {
+            background-color: #ffffff;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+        }
+
+        .btn-delete:hover {
+            background-color: #dc2626;
+            color: #ffffff;
+        }
+
+        .btn-add {
+            background-color: #059669;
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-add:hover {
+            background-color: #047857;
+            transform: translateY(-1px);
+        }
+
+        .address-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .profile-main-content {
+                padding: 1.5rem;
+            }
+            
+            .address-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+            
+            .btn-action {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+
+
+</style>
+{% endblock %}
+{% block main %}
+
+<div class="profile-main-content">
+    <h2 class="content-title">Manage Addresses</h2>
+    <div class="address-list">
+        {% for address in address %}
+        <div class="address-item">
+            <h3 class="address-type">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                {{ address.address_type }} Address
+            </h3>
+            <p class="address-text">{{ address.address1 }}</p>
+            <p class="address-text">{{ address.address2 }}</p>
+            <p class="address-text">
+                {{ address.city }}, {{ address.district }}, {{ address.state }} - {{ address.pincode }}
+            </p>
+            <div class="address-actions">
+                <a href="{% url 'edit_address' address.id %}" class="btn btn-action btn-edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="me-1">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                </a>
+                
+                <!-- Button to trigger modal -->
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAddressModal{{ address.id }}">
+                    Delete
+                </button>
+            </div>
+        </div>
+
+        <!-- Delete Address Modal -->
+        <div class="modal fade" id="deleteAddressModal{{ address.id }}" tabindex="-1" aria-labelledby="deleteAddressModalLabel{{ address.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteAddressModalLabel{{ address.id }}">Confirm Delete Address</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            Are you sure you want to delete this address? This action cannot be undone.
+                        </div>
+                        <div class="address-details">
+                            <p><strong>Address to be deleted:</strong></p>
+                            <p>{{ address.address1 }}, {{ address.address2 }}<br>
+                            {{ address.city }}, {{ address.state }} {{ address.pincode }}<br>
+                            {{ address.country }}</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form action="{% url 'delete_address' address.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Delete Address</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No addresses found. Please add a new address.</p>
+        {% endfor %}
+        
+        <!-- Add New Address Button -->
+        <a href="{% url 'add_address' %}" class="btn btn-add">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add New Address
+        </a>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block js %}
+<script>
+ // Ensure JavaScript runs after all modals are rendered
+ document.querySelectorAll('.modal').forEach(modalElement => {
+        modalElement.addEventListener('shown.bs.modal', function () {
+            console.log('Modal shown: ' + this.id);
+        });
+    });
+</script>
+
+{% endblock %}

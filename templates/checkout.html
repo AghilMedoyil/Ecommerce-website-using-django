@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block styles %}
+    <style>
+/* Main container adjustments */
+.container {
+    max-width: 900px;
+}
+
+/* Common section styling */
+.section-box {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1rem;
+    overflow: hidden; /* Prevent content from spilling out */
+}
+
+/* Typography */
+h2, h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.text-muted {
+    font-size: 0.9rem;
+}
+
+.form-check-label, .card-text {
+    font-size: 0.85rem;
+}
+
+/* Button standardization */
+.btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-black {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #000;
+}
+
+.btn-black:hover {
+    background-color: #333;
+    border-color: #333;
+    color: #fff;
+}
+
+.btn-outline-black {
+    color: #000;
+    border: 1px solid #000;
+    background-color: transparent;
+}
+
+.btn-outline-black:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+/* Address card styling */
+.address-card {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    background-color: #fafafa;
+}
+
+/* Product image */
+.product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Payment section improvements */
+.payment-options {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 0.75rem;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.payment-option {
+    flex: 1;
+    min-width: 100px; /* Prevent options from becoming too narrow */
+    max-width: calc(33.333% - 0.5rem); /* Ensure three columns with gap */
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.payment-option.selected {
+    border-color: #000;
+    background-color: #f8f9fa;
+}
+
+.payment-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* List group modifications */
+.list-group-item {
+    padding: 0.75rem;
+    border-color: #dee2e6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .payment-option {
+        min-width: calc(50% - 0.5rem); /* Two columns on smaller screens */
+    }
+}
+
+@media (max-width: 576px) {
+    .payment-option {
+        min-width: 100%; /* Full width on very small screens */
+    }
+}
+
+    </style>
+{% endblock %}
+{% block content %}
+
+<div class="container py-5">
+    <main>
+        <!-- Header -->
+        <div class="py-3 text-center">
+            <h2 class="fw-bold">Checkout</h2>
+            <p class="text-muted">Complete your order by selecting delivery address and payment method</p>
+        </div>
+
+        <div class="row g-3">
+            <!-- Order Summary Box -->
+            <div class="col-md-4 order-md-last">
+                <div class="section-box">
+                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Your Cart</span>
+                        <span class="badge bg-black rounded-pill"></span>
+                    </h4>
+                    <form method="post">
+                        {% csrf_token %}
+                    <ul class="list-group mb-3">
+                        {% for item in cart_item %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <img class="product-image me-3" src="{{ item.Product.image.url }}" alt="{{ item.Product.title }}">
+                                <div>
+                                    <h6 class="my-0">{{ item.Product.title }}</h6>
+                                    <p>{{ item.quantity }}</p>
+                                </div>
+                                
+                            </div>
+                            
+                            <span class="text-muted">${{ item.price }}</span>
+                            
+                        </li>
+                        {% endfor %}
+                    
+                    
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span >Sub Total (USD)</span>
+                            <input type="hidden" name="total_price"  value="{{ total_price }}">
+                            <strong id="subtotal">${{ total_price }}</strong>
+                        </li>
+                       
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Shipping Charges (USD)</span>
+                            <strong>${{ shipping_price }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Tax (USD)</span>
+                            <strong>${{ tax }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>discount (USD)</span>
+                            <input type="hidden" name="discount" id="hiddenDiscount" value="{{ discount }}">
+                            <strong  name="discount"  id="discountAmount">${{ discount }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Grand Total (USD)</span>
+                             <!-- Hidden input field for grand total -->
+                           <input type="hidden" name="grand_total" id="hiddenGrandTotal" value="{{ grand_total }}">
+                            <strong id="grandTotal" name="grand_total">${{ grand_total }}</strong>
+                        </li>
+                    </ul>
+                    
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Promocode" name="couponCode" id="couponCode">
+                            <button type="button" class="btn btn-black" id="applyCouponBtn">Apply</button>
+                        </div>
+                </div>
+            </div>
+
+            <!-- Shipping Address Box -->
+            <div class="col-md-6">
+                <div class="section-box">
+                    <h4 class="mb-3">Shipping Address</h4>
+                    <div class="addresses-container mb-3">
+                        {% for address in address %}
+                        <div class="address-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <div class="form-check mb-0">
+                                        
+                                        <input class="form-check-input" type="radio" name="address" id="address{{ forloop.counter }}" value="{{ address.id }}"checked>
+                                        <label class="form-check-label" for="address{{ forloop.counter }}">
+                                            <span class="fw-bold">{{ address.name }}</span>
+                                        </label>
+                                    </div>
+                                    {% if forloop.first %}
+                                    <span class="badge bg-light text-dark">Default</span>
+                                    {% endif %}
+                                </div>
+                                <p class="card-text text-muted">
+                                    {{ address.address1 }}, {{ address.address2 }}, {{ address.city }},{{ address.state }},{{ address.pincode }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <a href="{% url 'add_address' %}?next=checkout"><button class="btn btn-outline-black" type="button" data-bs-toggle="collapse" >
+                        Add New Address
+                    </button></a>
+                </div>
+
+               <!-- Payment Section Box -->
+               <!-- Payment Method Section -->
+    <div class="section-box">
+        <h4 class="mb-3">Payment Method</h4>
+             <!-- Wallet Balance Option -->
+    <div class="payment-options d-flex justify-content-between mb-3">
+        <div class="payment-option">
+            <input type="checkbox" id="use_wallet" name="wallet" value="{{ wallet.balance }}">
+            <label for="use_wallet">Use Wallet Balance</label>
+            <label >{{ wallet.balance }}</label>
+        </div>
+    </div>
+
+ 
+        
+        <div class="payment-options d-flex justify-content-between mb-3">
+            {% if grand_total < 1000 %}
+            <div class="payment-option">
+                <div class="payment-icon">💳</div>
+                <input type="radio" name="payment_method" value="paypal" id="paypal" class="payment-radio">
+                <label for="paypal">Pay with PayPal</label>
+            </div>
+            {% else %}
+            <div class="payment-option">
+                <div class="payment-icon">💳</div>
+                <input type="radio" name="payment_method" value="paypal" id="paypal" class="payment-radio" checked >
+                <label for="paypal">Pay with PayPal</label>
+            </div>
+            {% endif %}
+            <!-- <div class="payment-option">
+                <div class="payment-icon">📱</div>
+                <input type="radio" name="payment_method" value="upi" id="upi" class="payment-radio">
+                <label for="upi">UPI</label>
+            </div> -->
+            {% if grand_total < 1000 %}
+            <div class="payment-option selected">
+                <div class="payment-icon">💵</div>
+                <input type="radio" name="payment_method" value="cod" id="cod" class="payment-radio" checked>
+                <label for="cod">Cash on Delivery</label>
+            </div>
+            {% else %}
+            <div class="payment-option selected">
+                <div class="payment-icon">💵</div>
+                
+                <label for="cod">Cash on Delivery not possible above 1000 </label>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+               
+                
+                <button class="w-100 btn btn-black btn-lg" type="submit" value="{{ cart_item.Product.id }}">Place Order</button>
+            </div>
+        </form>
+        <!-- PayPal form will be rendered here when PayPal is selected -->
+        <div class="payment-option">
+{% if paypal %}
+
+        {{ paypal.render }}
+      
+    
+{% endif %}
+           </div>
+        
+        
+
+            </div>
+        </div>
+    </main>
+
+   
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#applyCouponBtn').click(function() {
+            var couponCode = $('#couponCode').val();
+            var totalAmount = parseFloat($('#grandTotal').text().replace('$', ''));  // Fetch subtotal value
+
+            if (!couponCode) {
+                alert("Please enter a valid coupon code.");
+                return;
+            }
+
+            $.ajax({
+                url: "{% url 'apply_coupon' %}",
+                method: "POST",
+                data: {
+                    coupon_code: couponCode,
+                    grand_total: totalAmount,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Update discount and grand total values dynamically
+                        $('#discountAmount').text('$' + response.discount_amount.toFixed(2));
+                        $('#grandTotal').text('$' + response.grand_total.toFixed(2));
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert("An error occurred while applying the coupon. Please try again.");
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        var grandTotal = parseFloat($('#grandTotal').text().replace('$', ''));
+        $('#hiddenGrandTotal').val(grandTotal);
+
+        $('form').submit(function() {
+            var grandTotal = parseFloat($('#grandTotal').text().replace('$', ''));
+            $('#hiddenGrandTotal').val(grandTotal);
+        });
+    });
+    $(document).ready(function() {
+    var discount = parseFloat($('#discountAmount').text().replace('$', ''));
+    $('#hiddenDiscount').val(discount);
+
+    $('form').submit(function() {
+        var discount = parseFloat($('#discountAmount').text().replace('$', ''));
+        $('#hiddenDiscount').val(discount);
+    });
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-11">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h2 class="mb-0">Order Details</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="order-container">
+                        <div class="card mb-3 border">
+                            <div class="card-body">
+                                <h5 class="card-title">Order #{{ order.id }}</h5>
+                                <p class="card-text mb-1">
+                                    <small class="text-muted">Ordered Date: {{ order.order_time|date:"F j, Y, g:i a" }}</small>
+                                </p>
+                                {% if order.order_status == 'cancelled' %}
+                                <span class="badge bg-success">refund</span>
+                                {% else %}
+
+                                <span class="badge bg-success">{{ order.order_status }}</span>
+                        {% endif %}
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <h6 class="card-subtitle mb-1 text-muted">Order ID</h6>
+                                        <p class="card-text">{{ order.id }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="card-subtitle mb-1 text-muted">Address</h6>
+                                        <p class="card-text">{{ order.user_address }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="card-subtitle mb-1 text-muted">Payment method</h6>
+                                        <p class="card-text">{{ order.payment_method }}</p>
+                                    </div>
+                                    
+                                </div>
+                        
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <h6 class="card-subtitle mb-2 text-muted">Product Details</h6>
+                                        <div class="order-items">
+                                            {% for item in order_item.all %}
+                                                <div class="d-flex align-items-start mb-3 border-bottom pb-2">
+                                                    <div class="me-3">
+                                                        <img src="{{ item.product.image.url }}" alt="Product Image" style="width: 100px; height: auto;">
+                                                    </div>
+                                                    <div>
+                                                        <p class="card-text mb-1"><strong>{{ item.product.title }}</strong></p>
+                                                        <p class="card-text mb-1"><strong>Price:</strong> ${{ item.product_price|floatformat:2 }}</p>
+                                                        <p class="card-text mb-1"><strong>Quantity:</strong> {{ item.product_quantity }}</p>
+                                                    </div>
+                                                </div>
+                                            {% empty %}
+                                                <p class="text-muted">No products found in this order.</p>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h5>Order Summary</h5>
+                                            <h6 class="card-subtitle mb-1 text-muted">Sub Total :${{ order.total_price|floatformat:2 }}</h6>
+                                            <p class="card-text"></p>
+                                            <h6 class="card-subtitle mb-1 text-muted">Shipping price: ${{ order.shipping_price|floatformat:2 }}</h6>
+                                            <p class="card-text"></p>
+                                            <h6 class="card-subtitle mb-1 text-muted">Tax: ${{ order.tax|floatformat:2 }}</h6>
+                                            <p class="card-text"></p>
+                                            <h6 class="card-subtitle mb-1 text-muted">Discount: ${{ order.discount|floatformat:2 }}</h6>
+                                            <p class="card-text"></p>
+                                            <h6 class="card-subtitle mb-1 text-muted">Grand Total: ${{ order.grand_total|floatformat:2 }}</h6>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                       
+                        <!-- End Cancel Order Modal -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

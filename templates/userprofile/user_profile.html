@@ -1,0 +1,118 @@
+{% extends 'userprofile/user_base.html' %}
+{% load static %}
+{% block style %}
+<style>
+/* Profile Card Styling */
+.profile-card {
+    margin-top: 50px;
+    margin-left: 60px;
+    background-color: #fff; /* White background for the card */
+    border: 1px solid #ddd; /* Subtle border */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Slight shadow for a modern look */
+    overflow: hidden; /* Ensures clean edges for content */
+    height: 60vh;
+    width: 540px;
+    margin-bottom: 230px;
+}
+
+.profile-card-header {
+    background-color: #000; /* Black header */
+    color: #fff; /* White text */
+    padding: 15px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+}
+
+.profile-card-body {
+    padding: 20px;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Inputs */
+.form-control {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #FFB84D; /* Light orange border on focus */
+    box-shadow: 0 0 5px rgba(255, 184, 77, 0.5); /* Subtle orange glow */
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #FFB84D; /* Light orange button */
+    border-color: #FFB84D;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #FFA726; /* Slightly darker orange */
+    border-color: #FFA726;
+}
+</style>
+{% endblock %}
+{% block main %}
+
+    
+<div class="col-12 col-lg-8 p-0 content-column">
+    <div class="profile-card">
+        <div class="profile-card-header">
+            <h2 class="h4 mb-0">User Profile</h2>
+        </div>
+        <div class="profile-card-body">
+            <form method="post">
+                {% csrf_token %}
+                <!-- Personal Information Section -->
+                <div class="mb-4">
+                    <div class="section-title">
+                        <i class="bi bi-person"></i> Personal Information
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                   value="{{ user.first_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                   value="{{ user.last_name }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Buttons -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    
+
+
+       
+    {% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'userprofile/user_base.html' %}
+{% load static %}
+
+{% block main %}
+<!-- Main Content -->
+<div class="profile-main-content">
+    <h2>Edit Profile</h2>
+    <form class="profile-info">
+        <div class="info-group">
+            <label for="first-name">First Name</label>
+            <input type="text" id="first-name" name="first-name" value="John">
+        </div>
+        <div class="info-group">
+            <label for="last-name">Last Name</label>
+            <input type="text" id="last-name" name="last-name" value="Doe">
+        </div>
+        <div class="info-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="john.doe@example.com">
+        </div>
+        <div class="info-group">
+            <label for="phone">Phone</label>
+            <input type="text" id="phone" name="phone" value="+1234567890">
+        </div>
+        <div class="info-group">
+            <label for="bio">Bio</label>
+            <textarea id="bio" name="bio" rows="4">Hello, I am John Doe.</textarea>
+        </div>
+        <div class="info-group">
+            <label for="profile-pic">Profile Picture</label>
+            <input type="file" id="profile-pic" name="profile-pic">
+        </div>
+        <div class="info-group">
+            <button type="submit" class="btn">Save Changes</button>
+            <button type="button" class="btn" style="background: #dc3545; margin-left: 10px;">Cancel</button>
+        </div>
+    </form>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block styles %}
+<style>
+    body {
+        background-color: #f8f9fa; /* Subtle background color */
+    }
+
+    .cart-container {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin: auto;
+        max-width: 700px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        
+    }
+
+    .cart-header h4 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 0.5rem;
+    }
+
+    .table.cart-table {
+        width: 100%;
+        margin-bottom: 1rem;
+        border-spacing: 0;
+    }
+
+    .table.cart-table th {
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        font-weight: bold;
+        color: #6c757d;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .table.cart-table td {
+        vertical-align: middle;
+        padding: 1rem;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    .custom-cart-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .custom-cart-product-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #343a40;
+        margin-bottom: 0.5rem;
+    }
+
+    .quantity-control {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: black;
+        text-decoration: none;
+        margin: 0 0.5rem;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .quantity-control:hover {
+        color: orange;
+    }
+
+    .custom-cart-remove-link {
+        font-size: 0.85rem;
+        color: #dc3545;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .custom-cart-remove-link:hover {
+        color: #c82333;
+    }
+
+    .custom-total-price {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .custom-total-price td {
+        padding: 0.5rem 0;
+    }
+
+    .price-tag {
+        font-weight: bold;
+        color: #343a40;
+    }
+
+    .checkout-btn {
+        padding: 0.8rem 2rem;
+        background-color: #ff9900;
+        border-color: #ff9900;
+        font-weight: bold;
+        font-size: 1rem;
+        border-radius: 8px;
+        text-transform: uppercase;
+        transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .checkout-btn:hover {
+        background-color: black;
+        border-color: #cc7a00;
+        box-shadow: 0 4px 12px rgba(255, 153, 0, 0.5);
+    }
+
+    .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .cart-item-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .cart-item-info {
+        margin-left: 1rem;
+    }
+
+    .cart-item-info strong {
+        font-size: 0.95rem;
+        color: #343a40;
+    }
+
+    .cart-item-info small {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+</style>
+
+
+{% endblock %}
+{% block content %}
+<div class="overlay" style="display:none"></div>
+<div class="cart-container">
+    <!-- Cart Header -->
+    <div class="cart-header mb-4">
+        <h4>Shopping Cart</h4>
+    </div>
+    
+    <!-- Cart Table -->
+    <div class="table-responsive">
+        <table class="table cart-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-end">Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>
+                        <div class="cart-item-container">
+                            <img src="{{ item.Product.image.url }}" alt="{{ item.Product.title }}" class="custom-cart-img">
+                            <div class="cart-item-info">
+                                <p class="custom-cart-product-name">{{ item.Product.title }}</p>
+                                <strong>Size: {{ item.varient.size }}</strong>
+                                <form action="{% url 'removecart' item.id %}" method="post" class="mt-1">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <div class="input-group">
+                            <a href="#" class="quantity-control" data-action="minus" data-item-id="{{ item.id }}"><h3>-</h3></a>
+                           
+                            <div id="quantity-{{ item.id }}" class="detail-qty border radius  m-auto">
+                                <span>{{ item.quantity }}</span>
+                            </div>
+                            <a href="#" class="quantity-control" data-action="plus" data-item-id="{{ item.id }}" ><h3>+</h3></a>
+                          </div>
+                    </td>
+                    
+                    <td class="text-end price-tag">${{ item.price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Cart Total -->
+    <div class="custom-total-price mt-4">
+        <table class="table table-borderless">
+            <tbody>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td class="text-end"><span id="total-price">${{ total_price }}</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Checkout Button -->
+    <div class="text-end mt-4">
+        <a class="btn btn-primary checkout-btn" href="{% url 'checkout' %}">Checkout</a>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.quantity-control').click(function(e){
+                e.preventDefault();
+                var action = $(this).data('action');
+                var itemId = $(this).data('item-id');
+           
+        
+                var url = action === 'plus' ? "{% url 'quantity_plus' 0  %}".replace('0', itemId) : "{% url 'quantity_minus' 0 %}".replace('0', itemId);
+        
+                var $quantitySpan = $('#quantity-' + itemId + ' span'); // Dynamically construct the selector
+        
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    data: {
+                        'item_id': itemId,
+                        
+                    },
+                    success: function(response){
+                        // Check for errors
+                        if (response.error) {
+                            Swal.fire(response.error);
+                            return; // Exit early if there's an error
+                        }
+                        // Update quantity for the specific item
+                        $quantitySpan.text(response.quantity);
+                        // Update total price if needed
+                        
+                        $('#total-price').text(response.total_price);
+                      
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });        
+    </script>                     
+
+{% endblock %}

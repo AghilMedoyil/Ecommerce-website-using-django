@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block styles %}
+    <!-- Custom Styles -->
+    <style>
+          .wallet-container {
+            max-width: 350px;
+            min-height: 350px;
+            margin: 60px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .wallet-header {
+            background-color: #f8f9fa;
+            color: #000;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .balance-card {
+            padding: 15px;
+            text-align: center;
+        }
+        .transaction-item {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.3s ease;
+        }
+        .transaction-item:hover {
+            background-color: #f8f9fa;
+        }
+        .transaction-amount-negative {
+            color: #dc3545;
+        }
+        .transaction-amount-positive {
+            color: #28a745;
+        }
+        .badge {
+            background-color: #cc7a00;
+            color: #fff;
+        }
+    </style>
+    
+    {% endblock %}
+{% block content %}
+<div class="container wallet-container">
+    <div class="wallet-header">
+        <h3 class="mb-0">Wallet</h3>
+    </div>
+
+    <div class="balance-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted">Total Balance</span>
+            <span class="badge">Active</span>
+        </div>
+        <h1 class="display-6 fw-bold mb-4">${{ wallet.balance }}</h1>
+
+        <!-- <div class="transactions">
+            <h5 class="mb-3 text-muted">Recent Transactions</h5>
+            <div class="list-group">
+                <div class="list-group-item transaction-item text-white d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <h6 class="mb-1">Netflix Subscription</h6>
+                        <small class="text-muted">23 Nov, 2024</small>
+                    </div>
+                    <span class="transaction-amount-negative">-$15.99</span>
+                </div>
+                <div class="list-group-item transaction-item text-white d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <h6 class="mb-1">Salary Deposit</h6>
+                        <small class="text-muted">22 Nov, 2024</small>
+                    </div>
+                    <span class="transaction-amount-positive">+$3,500.00</span>
+                </div>
+                <div class="list-group-item transaction-item text-white d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <h6 class="mb-1">Amazon Purchase</h6>
+                        <small class="text-muted">20 Nov, 2024</small>
+                    </div>
+                    <span class="transaction-amount-negative">-$129.45</span>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</div>
+
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+{% endblock %}

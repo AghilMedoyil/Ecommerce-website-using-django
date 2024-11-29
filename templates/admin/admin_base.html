@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - {% block title %}{% endblock %}</title>
+    <!-- Bootstrap 5.3.2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6.5.1 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    {% block styles %}
+    {% endblock %}
+    <style>
+            table tbody tr {
+    height: 50px; /* Adjust the height to your needs */
+    vertical-align: middle; /* Align text/content to the middle */
+}
+
+table tbody td {
+    overflow: hidden; /* Ensure content doesn't overflow */
+    text-overflow: ellipsis; /* Truncate overflowing text */
+    white-space: nowrap; /* Prevent wrapping */
+}
+        :root {
+            --sidebar-width: 240px;
+            --navbar-height: 70px;
+            --primary-black: #000000;
+            --secondary-black: #1a1a1a;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --text-gray: #666666;
+            --active-color: #ffffff;
+            --border-color: #e5e5e5;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--light-gray);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            padding-top: var(--navbar-height); /* Add padding to prevent content from going under navbar */
+        }
+
+        /* Navbar Styles */
+        .admin-navbar {
+            height: var(--navbar-height);
+            background-color: var(--primary-black);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-navbar .navbar-brand {
+            font-weight: 600;
+            color: var(--active-color);
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: var(--navbar-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--navbar-height));
+            background-color: #ffffff;
+            padding-top: 1rem;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .sidebar-section {
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .sidebar-section:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.25rem;
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 6px;
+            margin: 0.25rem 0.75rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-link:hover {
+            color: var(--primary-black);
+            background-color: var(--light-gray);
+        }
+
+        .sidebar-link.active {
+            color: var(--active-color);
+            background-color: var(--primary-black);
+        }
+
+        .sidebar-link i {
+            width: 1.5rem;
+            margin-right: 0.875rem;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 1.5rem;
+            min-height: calc(100vh - var(--navbar-height));
+            transition: all 0.3s ease;
+            background-color: var(--light-gray);
+        }
+
+        /* User Menu */
+        .user-menu .dropdown-toggle {
+            color: var(--active-color);
+            background: transparent;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }
+
+        .user-menu .dropdown-toggle:hover,
+        .user-menu .dropdown-toggle:focus {
+            color: var(--medium-gray);
+        }
+
+        .user-menu .dropdown-menu {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            margin-top: 0.75rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-menu .dropdown-item {
+            color: var(--text-gray);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .user-menu .dropdown-item:hover {
+            background-color: var(--light-gray);
+            color: var(--primary-black);
+        }
+
+        .user-menu .dropdown-divider {
+            border-color: var(--border-color);
+        }
+
+        /* Cards and Content Styling */
+        .content-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #ffffff;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--medium-gray);
+            border-radius: 2px;
+        }
+        /* Style for error messages */
+.messages .error {
+    color: red;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Style for success messages */
+.messages .success {
+    color: green;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Style for info messages */
+.messages .info {
+    color: blue;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Style for warning messages */
+.messages .warning {
+    color: orange;
+    
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+
+        /* Responsive Design */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .navbar-toggler {
+                color: var(--active-color);
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar admin-navbar fixed-top">
+        <div class="container-fluid px-4">
+            <button class="btn navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar">
+                <i class="fas fa-bars text-white"></i>
+            </button>
+            <a class="navbar-brand" href="#">
+                ADMIN CONSOLE
+            </a>
+            
+            <!-- User Menu -->
+            <div class="user-menu dropdown">
+                <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user-circle me-2"></i>
+                    <span class="d-none d-md-inline">Admin User</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <nav class="sidebar collapse d-lg-block" id="sidebar">
+        <div class="sidebar-section">
+            <a href="{% url 'dashboard' %}" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+        </div>
+        <div class="sidebar-section">
+            <a href="{% url 'category_list' %}" class="sidebar-link">
+                <i class="fas fa-list-alt"></i>
+                <span>Categories</span>
+            </a>
+            <a href="{% url 'product_list' %}" class="sidebar-link">
+                <i class="fas fa-box"></i>
+                <span>Products</span>
+            </a>
+            <a href="{% url 'brand_list' %}" class="sidebar-link">
+                <i class="fas fa-tags"></i>
+                <span>Brands</span>
+            </a>
+        </div>
+        <div class="sidebar-section">
+            <a href="{% url 'users' %}" class="sidebar-link">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+            <a href="{% url 'order_management' %}" class="sidebar-link">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Orders</span>
+            </a>
+            <a href="{% url 'product_offer' %}" class="sidebar-link">
+                <i class="fas fa-percentage"></i>
+                <span>Offers</span>
+            </a>
+            <a href="{% url 'coupons' %}" class="sidebar-link">
+                <i class="fas fa-gift"></i>
+                <span>Coupons</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}
+        <!-- Example content card -->
+        <div class="content-card card mb-4">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-4">Welcome to Admin Dashboard</h5>
+                <p class="card-text text-muted">Your content will appear here.</p>
+            </div>
+        </div>
+        {% endblock %}
+    </main>
+{% block js %}
+
+{% endblock %}
+    <!-- Bootstrap 5.3.2 Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

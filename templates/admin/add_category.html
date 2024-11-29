@@ -1,0 +1,22 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Add category{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Add New category</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter category name" required>
+        </div>
+    
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Enter category description" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Add category</button>
+    </form>
+</div>
+{% endblock %}

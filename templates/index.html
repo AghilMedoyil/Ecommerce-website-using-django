@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block styles %}
+<style>
+/* General Styles */
+body {
+    background-color: #f8f9fa; /* Dark black background */
+    color: #121212; /* White text */
+}
+
+h1, h2 {
+    color: #121212; /* White headings */
+    text-align: center;
+}
+
+a.btn {
+    background-color: #f39c12; /* Orange background */
+    color: #f8f9fa; /* Black text */
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
+}
+
+a.btn:hover {
+    background-color: #d35400; /* Darker orange on hover */
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Product Section */
+.small-container .row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+.col-3 {
+    flex: 1 1 calc(25% - 20px); /* Four columns in a row */
+    margin: 10px;
+    text-align: center;
+}
+
+.col-3 img {
+    max-height: 200px; /* Limit image height */
+    object-fit: cover; /* Maintain aspect ratio */
+}
+
+h4 {
+    margin-top: 10px;
+    font-size: 1.1rem;
+}
+h6{
+    color: #f39c12; /* Orange price */
+}
+p {
+    margin: 5px 0;
+    font-size: 1rem;
+    color: black; /* Orange price */
+}
+
+    
+</style>
+{% endblock %}
+{% block content %}
+
+
+
+<!-- Hero Section -->
+<div class="row hero-section">
+    <div class="col-2">
+        <h1>Give Your Workout <br> A New Style!</h1>
+        <p>Success isn't always about greatness. It's about consistency. <br> Consistent hard work gains success. Greatness will come.</p>
+        <a href="#" class="btn">Explore Now &#8594;</a>
+    </div>
+    <div class="col-2">
+        <img src="{% static 'images/image1.png' %}" alt="Workout Style Image">
+    </div>
+</div>
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Featured Brands</h2>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+      <div class="col">
+        <a href="#" class="text-decoration-none">
+          <div class="card h-100">
+            <img src="{% static 'images/brand1.jpeg' %}" class="card-img-top" alt="Brand 1">
+          </div>
+        </a>
+      </div>
+      <div class="col">
+        <a href="#" class="text-decoration-none">
+          <div class="card h-100">
+            <img src="{% static 'images/brand2.jpg' %}" class="card-img-top" alt="Brand 2">
+          </div>
+        </a>
+      </div>
+      <div class="col">
+        <a href="#" class="text-decoration-none">
+          <div class="card h-100">
+            <img src="brand3.jpg" class="card-img-top" alt="Brand 3">
+          </div>
+        </a>
+      </div>
+      <div class="col">
+        <a href="#" class="text-decoration-none">
+          <div class="card h-100">
+            <img src="brand4.jpg" class="card-img-top" alt="Brand 4">
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+<!-- Latest Products Section -->
+<div class="small-container">
+    <h2 class="title">Latest Products</h2>
+    <div class="row">
+        {% for product in latest|slice:":4" %}
+        <div class="col-3">
+            <a href="product_details.html">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            </a>
+            <h4>{{ product.title }}</h4>
+            <p>${{ product.varients.first.price }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

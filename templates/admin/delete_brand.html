@@ -1,0 +1,22 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Delete Brand{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="alert alert-danger">
+        <h1 class="text-center">Are you sure you want to delete this brand?</h1>
+    </div>
+
+    <div class="mb-4">
+        <p><strong>Name:</strong> {{ brands.Name }}</p>
+        <p><strong>Description:</strong> {{ brands.description }}</p>
+    </div>
+
+    <form method="POST" class="d-flex justify-content-between">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'category_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

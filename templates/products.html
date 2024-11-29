@@ -1,0 +1,747 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load tags %}
+{% block styles %}
+<style>
+/* Layout */
+.shop-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 30px;
+}
+
+/* Sidebar Styles */
+.shop-sidebar {
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.sidebar-section {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.sidebar-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.sidebar-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-option {
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 5px 0;
+    transition: color 0.3s ease;
+}
+
+.sidebar-option:hover,
+.sidebar-option.active {
+    color: #000;
+}
+
+/* Checkbox Styles */
+.category-link {
+    text-decoration: none; /* Removes underline */
+    color: inherit; /* Keeps text color consistent */
+}
+
+.category-link:hover {
+    text-decoration: none; /* Keeps it underline-free on hover */
+}
+/* Ensures the sidebar checkbox text is styled properly */
+.sidebar-checkbox .category-link {
+    text-decoration: none; /* Removes underline from links in sidebar checkboxes */
+    color: inherit; /* Keeps the color consistent with surrounding text */
+}
+
+.sidebar-checkbox:hover .category-link {
+    text-decoration: none; /* Prevents underline on hover */
+}
+
+
+/* Price Range Styles */
+.price-range {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.price-input {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.price-separator {
+    color: #666;
+}
+
+.price-apply-btn {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.price-apply-btn:hover {
+    background: #333;
+}
+
+/* Star Rating Styles */
+.stars {
+    color: #ffd700;
+    font-size: 12px;
+}
+
+/* View Options */
+.view-options {
+    display: flex;
+    gap: 10px;
+}
+
+.view-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-btn.active {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+/* Main Content Styles */
+.shop-main {
+    min-width: 0;
+}
+
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+    .shop-container {
+        grid-template-columns: 200px 1fr;
+        gap: 20px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .shop-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .shop-sidebar {
+        position: static;
+        margin-bottom: 20px;
+    }
+}
+
+/* Keep existing product grid styles */
+/* Container */
+/* Ajio-inspired Product Listing Styles */
+.ajio-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+    padding: 15px;
+}
+
+.ajio-product-card {
+    position: relative;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.ajio-product-card:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+}
+
+.product-wishlist-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+}
+
+.heart-icon {
+    font-size: 24px;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.heart-icon:hover {
+    color: #ff4444;
+}
+
+.product-image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 120%; /* Maintain aspect ratio */
+    overflow: hidden;
+}
+
+.product-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.ajio-product-card:hover .product-image {
+    transform: scale(1.05);
+}
+
+.product-discount-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #ff4444;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.product-details {
+    padding: 12px;
+}
+
+.brand-name {
+    font-size: 14px;
+    color: rgba(255, 166, 0, 0.884);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.product-title {
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-price-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.current-price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.original-price {
+    font-size: 14px;
+    color: #888;
+    text-decoration: line-through;
+}
+
+.discount-percentage {
+    font-size: 12px;
+    color: #ff4444;
+    font-weight: bold;
+}
+
+.product-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.delivery-tag {
+    font-size: 12px;
+    color: #4CAF50;
+    border: 1px solid #4CAF50;
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .ajio-product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .brand-name, .product-title, .product-meta {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ajio-product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 8px;
+    }
+}
+
+    /* Add these new styles to your existing CSS */
+    .search-container {
+        background: #fff;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 15px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .search-input-group {
+        display: flex;
+        flex: 1;
+        position: relative;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 12px 20px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #000;
+    }
+
+    .search-category {
+        min-width: 150px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+    }
+
+    .search-category:focus {
+        outline: none;
+        border-color: #000;
+    }
+
+    .search-button {
+        padding: 12px 24px;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+
+    .search-button:hover {
+        background-color: #FFA726;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+    }
+
+    @media screen and (max-width: 768px) {
+        .search-form {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .search-category {
+            width: 100%;
+            min-width: unset;
+        }
+    }
+
+    /* Update your existing shop-container style */
+    .shop-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+/* Ajio-inspired Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    user-select: none;
+}
+
+.pagination__btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    margin: 0 4px;
+    text-decoration: none;
+    border: 1px solid #e0e0e0;
+    background-color: white;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.pagination__btn:hover {
+    background-color: #f5f5f5;
+    border-color: #333;
+}
+
+.pagination__btn.active,
+.pagination__btn:active {
+    background-color: #333;
+    color: white;
+    border-color: #333;
+}
+
+.pagination__number {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.pagination__arrow {
+    font-size: 24px;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Disabled state for first/last page buttons */
+.pagination__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f9f9f9;
+    border-color: #e0e0e0;
+    color: #999;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .pagination {
+        margin-top: 15px;
+    }
+
+    .pagination__btn {
+        width: 35px;
+        height: 35px;
+        margin: 0 2px;
+    }
+
+    .pagination__number {
+        font-size: 13px;
+    }
+
+    .pagination__arrow {
+        font-size: 22px;
+    }
+}
+    /* All other existing styles remain the same */
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <form action="{% url 'searchbar' %}" method="GET" class="search-form">
+        {% csrf_token %}
+        <div class="search-input-group">
+            <input type="text" 
+                   name="q" 
+                   class="search-input" 
+                   placeholder="Search products..."
+                   value="{{ request.GET.q }}"
+            >
+            
+        </div>
+    
+ 
+        <select name="category" class="search-category">
+            <option value="all_categories" name="all_categories">All Categories</option>
+            {% for category in categories %}
+            <option value="{{ category.Name }}" {% if request.POST.category == category.Name %}selected{% endif %}>
+                {{ category.Name }}
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="search-button">Search</button>
+    </form>
+</div>
+<div class="shop-container">
+    <!-- Sidebar -->
+    <aside class="shop-sidebar">
+        <div class="sidebar-section">
+            <form method="get" id="filterForm">
+            <label for="sort" class="form-label">Sort by:</label>
+            <select name="sort" id="sort" class="form-select" onchange="document.getElementById('sortForm').submit();">
+                <option value="name_a-z" {% if current_sort == 'name_a-z' %}selected{% endif %}>a-z</option>
+                <option value="name_z-a" {% if current_sort == 'name_z-a' %}selected{% endif %}>z-a</option>
+
+                <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                <option value="date" {% if current_sort == 'date' %}selected{% endif %}>Newest</option>
+            </select>
+            <!-- <h3 class="sidebar-title">Sort By</h3>
+            <div class="sidebar-options">
+                <a href="?sort=latest" class="sidebar-option {% if current_sort == 'newest' %}active{% endif %}">
+                    Newest Arrivals
+                </a>
+                <a href="?sort=relevance" class="sidebar-option {% if current_sort == 'newest' %}active{% endif %}">
+                    Relevance
+                </a>
+                <a href="?sort=price_low" class="sidebar-option {% if current_sort == 'price_low' %}active{% endif %}">
+                    Price: Low to High
+                </a>
+                <a href="?sort=price_high" class="sidebar-option {% if current_sort == 'price_high' %}active{% endif %}">
+                    Price: High to Low
+                </a>
+                <a href="?sort=name_asc" class="sidebar-option {% if current_sort == 'price_high' %}active{% endif %}">
+                    Name : A to Z
+                </a>
+                <a href="?sort=name_desc" class="sidebar-option {% if current_sort == 'price_high' %}active{% endif %}">
+                    Name : Z to A
+                </a>
+            </div> -->
+        </div>
+
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Categories</h3>
+            
+                <div class="sidebar-options">
+                    {% for category in categories %}
+                    <label class="form-check">
+                        <input 
+                            type="checkbox" 
+                            name="category" 
+                            value="{{ category.id }}" 
+                            class="form-check-input" 
+                            {% if category.id|stringformat:"s" in selected_categories %}checked{% endif %}>
+                        <span class="form-check-label">{{ category.Name }} <span class="checkbox-count">({{ category.product_count }})</span></span>
+                    </label>
+                    {% endfor %}
+                </div>
+        
+                <h3 class="sidebar-title mt-4">Brands</h3>
+                <div class="sidebar-options">
+                    {% for brand in brands %}
+                    <label class="form-check">
+                        <input 
+                            type="checkbox" 
+                            name="brand" 
+                            value="{{ brand.id }}" 
+                            class="form-check-input" 
+                            {% if brand.id|stringformat:"s" in selected_brands %}checked{% endif %}>
+                        <span class="form-check-label">{{ brand.Name }} <span class="checkbox-count">({{ brand.product_count }})</span></span>
+                    </label>
+                    {% endfor %}
+                </div>
+
+               
+        
+                <!-- Apply Filter Button -->
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+        
+
+        <!-- <div class="sidebar-section">
+            <h3 class="sidebar-title">Price Range</h3>
+            <div class="price-range">
+                <div class="price-inputs">
+                    <input type="number" id="min-price" name="min_price" placeholder="Min" value="{{ min_price }}"
+                        class="price-input">
+                    <span class="price-separator">-</span>
+                    <input type="number" id="max-price" name="max_price" placeholder="Max" value="{{ max_price }}"
+                        class="price-input">
+                </div>
+                <button class="price-apply-btn">Apply</button>
+            </div>
+        </div> -->
+
+        <!-- <div class="sidebar-section">
+            <h3 class="sidebar-title">Ratings</h3>
+            <div class="sidebar-options">
+                {% for rating in "54321"|make_list %}
+                <label class="sidebar-checkbox">
+                    <input type="checkbox" name="rating" value="{{ rating }}"
+                        {% if rating in selected_ratings %}checked{% endif %}
+                        onchange="this.form.submit()">
+                    <span class="checkbox-label">
+                        <span class="stars">
+                            {% for i in rating|ljust:5 %}
+                            <i class="fas fa-star"></i>
+                            {% endfor %}
+                        </span>
+                        & up
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+        </div> -->
+    </aside>
+
+    <!-- Main Content -->
+    <main class="shop-main">
+        <div class="product-header">
+            <h2>All Products</h2>
+            <div class="view-options">
+                <button class="view-btn active" data-view="grid">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="view-btn" data-view="list">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+        
+        {% for product_tag in products|tags:3 %}
+        <div class="ajio-product-grid">
+            {% for product in product_tag %}
+            <div class="ajio-product-card">
+                <div class="product-wishlist-icon">
+                    <i class="heart-icon">♡</i>
+                </div>
+                
+                <a href="{% url 'productsdetail' product.id product.varients.first.size %}" class="product-link">
+                    <div class="product-image-wrapper">
+                        <img src="{{ product.image.url }}" alt="{{ product.title }}" class="product-image">
+                        
+                        {% if product.discount %}
+                        <div class="product-discount-badge">
+                            {{ product.discount }}% OFF
+                        </div>
+                        {% endif %}
+                    </div>
+    
+                    <div class="product-details">
+                        <h3 class="brand-name">{{ product.brand.Name }}</h3>
+                        <p class="product-title">{{ product.title }}</p>
+                        
+                        <div class="product-price-section">
+                            <span class="current-price">₹{{ product.varients.first.price }}</span>
+                            {% if product.original_price %}
+                            <span class="original-price">₹{{ product.original_price }}</span>
+                            {% endif %}
+                            {% if product.discount %}
+                            <span class="discount-percentage">{{ product.discount }}% OFF</span>
+                            {% endif %}
+                        </div>
+    
+                        <div class="product-meta">
+                            <span class="product-size">Size: {{ product.varients.first.size }}</span>
+                            <span class="product-stock">Stock: {{ product.varients.first.stock }}</span>
+                        </div>
+    
+                        {% if product.delivery_type %}
+                        <div class="delivery-tag">
+                            {{ product.delivery_type }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+        <div class="pagination">
+            {% if products.has_previous %}
+            <a href="?page={{ products.previous_page_number }}&q={{ query }}&sort={{ sort_option }}" class="pagination__btn">
+                <span class="pagination__arrow">&#8249;</span>
+            </a>
+            {% endif %}
+            
+            {% for i in products.paginator.page_range %}
+            <a href="?page={{i}}&q={{ query }}&sort={{ sort_option }}" class="pagination__btn">
+                <span class="pagination__number">{{i}}</span>
+            </a>
+            {% endfor %}
+            
+            {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}&q={{ query }}&sort={{ sort_option }}" class="pagination__btn">
+                <span class="pagination__arrow">&#8250;</span>
+            </a>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

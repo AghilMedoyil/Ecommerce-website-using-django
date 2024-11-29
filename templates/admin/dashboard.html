@@ -1,0 +1,381 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+{% block styles %}
+<style>
+    .datepicker {
+        background-color: white;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .input-daterange input {
+        cursor: pointer;
+    }
+    .input-daterange .input-group-addon {
+        border-radius: 0;
+        border-width: 1px 0;
+        padding: 8px 12px;
+    }
+    .stats-card {
+        transition: transform 0.2s;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    .table-custom th {
+        background-color: #212529;
+        color: white;
+        font-weight: 500;
+    }
+    .stats-heading {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-5">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-dark">Sales Report</h2>
+        <div class="flex gap-4 mb-4">
+            <button onclick="exportToPDF()" class="btn btn-secondary">Export to PDF</button>
+            <button onclick="exportToExcel()" class="btn btn-secondary">Export to Excel</button>
+        </div>
+    </div>
+    <div id="loadingIndicator" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; background: rgba(255,255,255,0.9); padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-2">Generating PDF...</div>
+        </div>
+    </div>
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Sales</h6>
+                    <h3 class="mb-0">₹{{ total_sales }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Orders</h6>
+                    <h3 class="mb-0">{{ total_orders }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Discounts</h6>
+                    <h3 class="mb-0">₹{{ total_discounts }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Net Revenue</h6>
+                    <h3 class="mb-0">₹{{ net_revenue }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <!-- Best Sellers -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 stats-card">
+                <div class="card-body">
+                    <h5 class="stats-heading">Best Selling Products</h5>
+                    <div class="table-responsive">
+                        <table class="table table-custom table-borderless">
+                            <thead>
+                                <tr>
+                                    <th class="rounded-start">Product Name</th>
+                                    <th class="text-end rounded-end">Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in best_seller_product %}
+                                <tr>
+                                    <td>{{ product.title }}</td>
+                                    <td class="text-end fw-bold">{{ product.sold_count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Top Categories -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 stats-card">
+                <div class="card-body">
+                    <h5 class="stats-heading">Top Categories</h5>
+                    <div class="table-responsive">
+                        <table class="table table-custom table-borderless">
+                            <thead>
+                                <tr>
+                                    <th class="rounded-start">Category</th>
+                                    <th class="text-end rounded-end">Items Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in top_category %}
+                                <tr>
+                                    <td>{{ c.Name }}</td>
+                                    <td class="text-end fw-bold">{{ c.total_sold }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Top Brands -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 stats-card">
+                <div class="card-body">
+                    <h5 class="stats-heading">Top Brands</h5>
+                    <div class="table-responsive">
+                        <table class="table table-custom table-borderless">
+                            <thead>
+                                <tr>
+                                    <th class="rounded-start">Brand Name</th>
+                                    <th class="text-end rounded-end">Units Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in top_brands %}
+                                <tr>
+                                    <td>{{ c.Name }}</td>
+                                    <td class="text-end fw-bold">{{ c.total_sold }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+  <!-- Sales Chart -->
+<div class="bg-white p-6 rounded shadow">
+    <canvas id="salesChart"></canvas>
+</div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Report Type</label>
+                    <select class="form-select" name="report_type" id="reportType">
+                        <option value="daily" {% if request.GET.report_type == "daily" %}selected{% endif %}>Daily</option>
+                        <option value="weekly" {% if request.GET.report_type == "weekly" %}selected{% endif %}>Weekly</option>
+                        <option value="monthly" {% if request.GET.report_type == "monthly" %}selected{% endif %}>Monthly</option>
+                        <option value="yearly" {% if request.GET.report_type == "yearly" %}selected{% endif %}>Yearly</option>
+                        <option value="custom" {% if request.GET.report_type == "custom" %}selected{% endif %}>Custom Date Range</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3 custom-date d-none">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" class="form-control" name="start_date">
+                </div>
+                
+                <div class="col-md-3 custom-date d-none">
+                    <label class="form-label">End Date</label>
+                    <input type="date" class="form-control" name="end_date">
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-dark">Generate Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sales Report Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Subtotal</th>
+                            <th>Discount</th>
+                            <!-- <th>Coupon</th> -->
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>{{ order.order_time|date:"Y-m-d" }}</td>
+                            <td>{{ order.order_time|date:"H:i" }}</td>
+
+                            <td>{{ order.user.first_name }}</td>
+                            <td>{{ order.items.all|length }}</td>
+                            <td>₹{{ order.total_price }}</td>
+                            <td>₹{{ order.discount }}</td>
+                            <!-- <td>{{ order.coupon_code }}</td> -->
+                            <td>₹{{ order.grand_total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block js %}
+<script>
+document.getElementById('reportType').addEventListener('change', function() {
+    const customDateFields = document.querySelectorAll('.custom-date');
+    if (this.value === 'custom') {
+        customDateFields.forEach(field => field.classList.remove('d-none'));
+    } else {
+        customDateFields.forEach(field => field.classList.add('d-none'));
+    }
+});
+
+
+function exportToPDF() {
+    try {
+        console.log('Starting PDF export...');
+
+        // Show loading indicator
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
+
+        // Update the URL with `export=pdf`
+        const currentFilters = new URLSearchParams(window.location.search);
+        currentFilters.set('export', 'pdf');
+
+        const exportUrl = `${window.location.pathname}?${currentFilters.toString()}`;
+        console.log('Export URL:', exportUrl);
+
+        // Trigger the request
+        window.location.href = exportUrl;
+
+        // Hide loading indicator after a delay
+        setTimeout(() => {
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+        }, 3000);
+    } catch (error) {
+        console.error('Error during PDF export:', error);
+        alert('There was an error generating the PDF. Please try again.');
+    }
+}
+
+
+
+
+function exportToExcel() {
+    // Show loading indicator
+    document.getElementById('loadingIndicator').style.display = 'block';
+    
+    // Get current filters
+    const currentFilters = new URLSearchParams(window.location.search);
+    currentFilters.append('export', 'excel');
+    
+    // Trigger download
+    window.location.href = `${window.location.pathname}?${currentFilters.toString()}`;
+    
+    // Hide loading indicator after a delay
+    setTimeout(() => {
+        document.getElementById('loadingIndicator').style.display = 'none';
+    }, 2000);
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Initialize Chart -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Parse the Django context data with proper escaping
+        const groupedSales = JSON.parse('{{ grouped_sales|escapejs }}');
+        
+        // Debug logs
+        console.log('Raw Grouped Sales:', groupedSales);
+        console.log('Type of groupedSales:', typeof groupedSales);
+        console.log('Length of groupedSales:', groupedSales.length);
+        
+        // Extract labels and data
+        const labels = groupedSales.map(item => item.period);
+        const data = groupedSales.map(item => parseFloat(item.total_sales));
+        
+        // Debug logs for extracted data
+        console.log('Extracted Labels:', labels);
+        console.log('Extracted Data:', data);
+        
+        // Create the chart
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Sales Over Time',
+                    data: data,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Sales Trend'
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Sales Amount ($)'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+    </script>
+
+{% endblock %}

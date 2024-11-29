@@ -1,0 +1,161 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Add Product{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">Add New Product</h1>
+
+   
+
+    <form method="POST" enctype="multipart/form-data" class="shadow-lg p-4 rounded bg-light">
+        {% csrf_token %}
+        
+        <div class="form-group mb-3">
+            <label for="name" class="form-label">Product Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter product name" required>
+        </div>
+
+       
+
+        <div class="form-group mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Enter product description" required></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" id="category" name="category" required>
+                <option value="" disabled selected>Select a category</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.Name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="brand" class="form-label">Brand</label>
+            <select class="form-select" id="brand" name="brand" required>
+                <option value="" disabled selected>Select a brand</option>
+                {% for brand in brands %}
+                    <option value="{{ brand.id }}">{{ brand.Name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+      
+
+        <div class="form-group mb-3">
+            <label for="image" class="form-label">Product Image</label>
+            <input type="file" class="form-control" id="image" name="image" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="images" class="form-label">Additional Images</label>
+            <input type="file" class="form-control" id="images" name="images" multiple>
+        </div>
+
+        <!-- Variants Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Product Variants</h5>
+                <button type="button" class="btn btn-sm btn-primary" id="addVariant">
+                    <i class="bi bi-plus-lg"></i> Add Variant
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="variantsContainer">
+                    {% for varient in varients %}
+                    <div class="variant-item border rounded p-3 mb-3">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Size</label>
+                                <select class="form-select" name="varient_size[]">
+                                    <option value="S" {% if varient.size == 'S' %}selected{% endif %}>Small</option>
+                                    <option value="M" {% if varient.size == 'M' %}selected{% endif %}>Medium</option>
+                                    <option value="L" {% if varient.size == 'L' %}selected{% endif %}>Large</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Price</label>
+                                <input type="number" class="form-control" name="varient_price[]" value="{{ varient.price }}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Stock</label>
+                                <input type="number" class="form-control" name="varient_stock[]" value="{{ varient.stock }}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="button" class="btn btn-danger d-block w-100 remove-variant">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+        <button type="submit" class="btn btn-primary w-100">Add Product</button>
+    </form>
+  
+</div>
+
+
+
+{% block js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const variantsContainer = document.getElementById('variantsContainer');
+    const addVariantBtn = document.getElementById('addVariant');
+
+    addVariantBtn.addEventListener('click', function() {
+        const variantHTML = `
+            <div class="variant-item border rounded p-3 mb-3">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Size</label>
+                        <select class="form-select" name="varient_size[]">
+                            <option value="S">Small</option>
+                            <option value="M">Medium</option>
+                            <option value="L">Large</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" class="form-control" name="varient_price[]" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Stock</label>
+                        <input type="number" class="form-control" name="varient_stock[]" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" class="btn btn-danger d-block w-100 remove-variant">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        variantsContainer.insertAdjacentHTML('beforeend', variantHTML);
+    });
+
+    // Event delegation for remove buttons
+    variantsContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-variant')) {
+            e.target.closest('.variant-item').remove();
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

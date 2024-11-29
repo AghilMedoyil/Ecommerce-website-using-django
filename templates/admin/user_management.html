@@ -1,0 +1,94 @@
+{% extends 'admin/admin_base.html' %}
+
+
+
+{% block content %}
+<h1>User List</h1>
+<table class="table">
+    <thead>
+        <tr>
+            
+            <th>Email</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            
+            <td>{{ user.email }}</td>
+            <td>
+                {% if user.is_active %}
+                    <span class="badge badge-success">Active</span>
+                {% else %}
+                    <span class="badge badge-danger">Blocked</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if user.is_active %}
+                    <!-- Block User Button -->
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#blockUserModal{{ user.id }}">Block</button>
+                {% else %}
+                    <!-- Unblock User Button -->
+                    <button class="btn btn-success" data-toggle="modal" data-target="#unblockUserModal{{ user.id }}">Unblock</button>
+                {% endif %}
+            </td>
+        </tr>
+
+        <!-- Block User Modal -->
+        <div class="modal fade" id="blockUserModal{{ user.id }}" tabindex="-1" role="dialog" aria-labelledby="blockUserModalLabel{{ user.id }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="blockUserModalLabel{{ user.id }}">Confirm Block</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to block {{ user.email }}?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <form action="{% url 'block_user' user.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Block</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unblock User Modal -->
+        <div class="modal fade" id="unblockUserModal{{ user.id }}" tabindex="-1" role="dialog" aria-labelledby="unblockUserModalLabel{{ user.id }}" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="unblockUserModalLabel{{ user.id }}">Confirm Unblock</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to unblock {{ user.email }}?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <form action="{% url 'unblock_user' user.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Unblock</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% empty %}
+        <tr>
+            <td colspan="4">No users found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

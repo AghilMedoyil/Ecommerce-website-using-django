@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block styles %}
+<style>
+       .shop-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding-left: 40px;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 30px;
+    }
+/* Sidebar Styling */
+.user-dashboard-sidebar {
+        
+       margin-top: 50px;
+        width: 250px;
+        height: 68vh;
+        background-color: #121212; /* Dark black background */
+        border-right: 1px solid #333;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        padding: 40px 0;
+    }
+
+    .sidebar-navigation {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-item {
+        margin-bottom: 10px;
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: #ffffff; /* White text and icons */
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Hover Effects */
+    .sidebar-link:hover {
+        background-color: #ff6a00cb; /* Professional orange for hover */
+        color: #ffffff; /* Keep the text white */
+        box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-item-content {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Icons */
+    .sidebar-icon {
+        margin-right: 12px;
+        font-size: 18px;
+        color: #ffffff; /* White icons */
+        transition: color 0.3s ease;
+    }
+
+    .sidebar-link:hover .sidebar-icon {
+        color: #ffffff; /* Keep the icons white on hover */
+    }
+
+    /* Text Labels */
+    .sidebar-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: inherit;
+        transition: color 0.3s ease;
+    }
+
+    /* Divider */
+    .sidebar-divider {
+        margin: 20px 0;
+        border-top: 1px solid #333;
+    }
+
+    /* Smooth Font */
+    .user-dashboard-sidebar * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    /* Sidebar Footer */
+/* Sidebar Footer */
+.sidebar-footer {
+    margin-top: auto; /* Pushes the footer to the bottom */
+    padding: 20px;
+    text-align: center;
+    background-color: #000;
+    border-top: 1px solid #333;
+}
+
+.sidebar-brand {
+    color: #FFB84D; /* Stylish orange */
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+    letter-spacing: 1px;
+    font-family: 'Raleway', sans-serif; /* Sleek, professional font */
+    position: relative; /* For positioning strikethrough */
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+/* Strikethrough effect */
+.sidebar-brand::before {
+    content: ''; 
+    position: absolute; 
+    bottom: 50%; 
+    left: 0; 
+    width: 100%; 
+    height: 2px; /* Thickness of strikethrough */
+    background-color: #FFB84D;
+    transform: translateY(50%); /* Align the line in the middle */
+    transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.sidebar-brand:hover {
+    color: #FFA726; /* Darker orange */
+    text-decoration: none; /* Remove default underline on hover */
+    text-shadow: 0 0 8px rgba(255, 184, 77, 0.5); /* Glow effect */
+}
+
+.sidebar-brand:hover::before {
+    background-color: #FFA726; /* Change strikethrough color on hover */
+}
+
+    
+    </style>
+    {% block style %}
+    {% endblock %}
+
+{% endblock %}
+       
+        {% block content %}
+
+
+        <div class="shop-container">
+            <aside class="user-dashboard-sidebar">
+                <div class="sidebar-container">
+                    <nav class="sidebar-menu">
+                        <ul class="sidebar-navigation">
+                            <li class="sidebar-item">
+                                <a href="{% url 'profile' %}" class="sidebar-link">
+                                    <div class="sidebar-item-content">
+                                        <i class="fa-solid fa-user sidebar-icon"></i>
+                                        <span class="sidebar-label">Profile</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="{% url 'orders_list' %}" class="sidebar-link">
+                                    <div class="sidebar-item-content">
+                                        <i class="fa-solid fa-box sidebar-icon"></i>
+                                        <span class="sidebar-label">Orders</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="{% url 'manage_address' %}" class="sidebar-link">
+                                    <div class="sidebar-item-content">
+                                        <i class="fa-solid fa-location-dot sidebar-icon"></i>
+                                        <span class="sidebar-label">Addresses</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="" class="sidebar-link">
+                                    <div class="sidebar-item-content">
+                                        <i class="fa-solid fa-lock sidebar-icon"></i>
+                                        <span class="sidebar-label">Change Password</span>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="sidebar-footer">
+                            <a href="#" class="sidebar-brand">SHOP.CO</a>
+                        </div>
+                        
+                    </nav>
+                </div>
+            </aside>
+            
+            
+            {% block main %}
+            {% endblock %}
+        
+        
+    </div>
+    {% endblock %}

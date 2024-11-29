@@ -1,0 +1,115 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Category Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark fw-semibold">Category Management</h5>
+                <a href="{% url 'add_category' %}" class="btn btn-dark">
+                    <i class="bi bi-plus-circle me-2"></i>Add New Category
+                </a>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="px-4 py-3">Name</th>
+                            <th class="px-4 py-3">Description</th>
+                            <th class="px-4 py-3">Status</th>
+                            <th class="px-4 py-3" width="100">Edit</th>
+                            <th class="px-4 py-3" width="100">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                        <tr>
+                            <td class="px-4 py-3">{{ category.Name }}</td>
+                            <td class="px-4 py-3">{{ category.description }}</td>
+                            <td class="px-4 py-3">
+                                {% if category.delete_status == category.LIVE %}
+                                    <span class="badge bg-success-subtle text-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger">Blocked</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                <a href="{% url 'edit_category' category.id %}" class="btn btn-outline-dark btn-sm">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3">
+                                {% if category.delete_status == category.LIVE %}
+                                    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#blockModal{{ category.id }}">
+                                        <i class="bi bi-slash-circle me-1"></i>Block
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#unblockModal{{ category.id }}">
+                                        <i class="bi bi-check-circle me-1"></i>Unblock
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <!-- Block Modal -->
+                        <div class="modal fade" id="blockModal{{ category.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header border-bottom-0">
+                                        <h5 class="modal-title">Confirm Block</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body py-4">
+                                        <p class="mb-0">Are you sure you want to block <strong>{{ category.Name }}</strong>?</p>
+                                    </div>
+                                    <div class="modal-footer border-top-0">
+                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                        <form action="{% url 'block_category' category.id %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">Block</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Unblock Modal -->
+                        <div class="modal fade" id="unblockModal{{ category.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header border-bottom-0">
+                                        <h5 class="modal-title">Confirm Unblock</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body py-4">
+                                        <p class="mb-0">Are you sure you want to unblock <strong>{{ category.Name }}</strong>?</p>
+                                    </div>
+                                    <div class="modal-footer border-top-0">
+                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                        <form action="{% url 'unblock_category' category.id %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success">Unblock</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">No categories found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Don't forget to include Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}

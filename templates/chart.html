@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="myChart"></canvas>
+    <pre>{{ grouped_sales|safe }}</pre>
+
+
+    <script>
+        const groupedSales = JSON.parse('{{ grouped_sales|escapejs }}');
+    
+        // Debugging: Log the parsed data
+        console.log(groupedSales);
+    
+        // Extract labels (periods) and data (total sales)
+        const labels = groupedSales.map(item => item.period);
+        const data = groupedSales.map(item => item.total_sales);
+    
+        // Initialize Chart.js
+        new Chart(document.getElementById('salesChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Sales',
+                    data: data,
+                    borderColor: 'blue',
+                    borderWidth: 2,
+                    fill: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Date' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Sales' },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+    
+</body>
+</html>
