@@ -30,7 +30,7 @@
                             <td class="px-4 py-3">{{ brand.Name }}</td>
                             <td class="px-4 py-3">{{ brand.description }}</td>
                             <td class="px-4 py-3">
-                                {% if brand.delete_status == 'LIVE' %}
+                                {% if brand.delete_status == brand.LIVE %}
                                     <span class="badge bg-success-subtle text-success">Active</span>
                                 {% else %}
                                     <span class="badge bg-danger-subtle text-danger">Inactive</span>

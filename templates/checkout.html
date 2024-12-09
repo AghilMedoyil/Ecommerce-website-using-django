@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block styles %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
 /* Main container adjustments */
-.container {
-    max-width: 900px;
-}
+
 
 /* Common section styling */
 .section-box {
@@ -130,6 +129,108 @@ h2, h4 {
         min-width: 100%; /* Full width on very small screens */
     }
 }
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 10px;
+        border: none;
+        height: 150px; /* Fixed height */
+        width: 450px; /* Fixed width */
+        position: absolute;
+        top: 10%; /* Slightly offset from the top */
+        left: 50%; /* Center horizontally */
+        transform: translateX(-50%); /* Offset the left margin by 50% of its width */
+        max-width: 100%; /* Ensure it does not overflow */
+    }
+
+    .modal-header {
+        background-color: #496379; /* Green background */
+        color: white;
+        border-bottom: 2px solid #496379; /* Darker green border */
+        height: 40px; /* Increased height for better design */
+        position: relative; /* To position the close button within the header */
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin: 0; /* Prevent margin around the title */
+    }
+
+    .modal-body {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+        margin-top: -20px;
+    }
+
+    .modal-footer .btn {
+        border-radius: 5px;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d; /* Grey button for Close */
+        border-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+
+    .btn-close {
+        position: absolute; /* Position it within the header */
+        top: 50%; /* Center vertically */
+        right: 15px; /* Position to the right */
+        transform: translateY(-50%); /* Center it perfectly */
+        color: white;
+        opacity: 0.8;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    /* Responsive Styling */
+    @media (max-width: 768px) {
+        .modal-content {
+            width: 90%; /* Adjust width for smaller screens */
+            height: auto; /* Allow the height to adjust */
+            top: 15%; /* Slightly more margin from the top */
+        }
+
+        .modal-header {
+            height: 50px; /* Increase header height for small screens */
+        }
+
+        .modal-title {
+            font-size: 1.2rem; /* Slightly smaller title font size */
+        }
+    }
+
+    @media (max-width: 576px) {
+        .modal-content {
+            width: 95%; /* Maximize width for very small screens */
+            height: auto;
+            top: 20%; /* More margin from the top */
+        }
+
+        .modal-header {
+            height: 60px; /* Increase header height further for smaller screens */
+        }
+
+        .modal-title {
+            font-size: 1rem; /* Adjust font size for very small screens */
+        }
+
+        .modal-body {
+            font-size: 0.9rem; /* Smaller text size for readability */
+        }
+    }
 
     </style>
 {% endblock %}
@@ -197,13 +298,49 @@ h2, h4 {
                             <strong id="grandTotal" name="grand_total">${{ grand_total }}</strong>
                         </li>
                     </ul>
+                                        
+                    <!-- Dropdown for coupons -->
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary dropdown-toggle" 
+                                type="button" 
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false">
+                            Available Coupons
+                        </button>
+                        {% if coupon %}
+                        <ul class="dropdown-menu" id="couponDropdown">
+                            {% for c in coupon %}
+                            <li>
+                                <div class="dropdown-item coupon-item">
+                                    <span class="coupon-code">{{ c.code }}</span>
+                                    <button class="btn btn-link copy-btn" data-coupon="{{ c.code }}">
+                                        <i class="bi bi-copy"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted px-3">{{ c.discount_percentage|floatformat:0 }}
+                                    % off </small>
+                            </li>
+                      {% endfor %}
+                           
+                        </ul>
+                        {% else %}
+                                <ul class="dropdown-menu">
+                                    <li class="dropdown-item text-muted">No coupons available</li>
+                                </ul>
+                            {% endif %}
+                    </div>
                     
                         <div class="input-group">
+                            
                             <input type="text" class="form-control" placeholder="Promocode" name="couponCode" id="couponCode">
                             <button type="button" class="btn btn-black" id="applyCouponBtn">Apply</button>
                         </div>
+                        
+
+                        
                 </div>
             </div>
+            
 
             <!-- Shipping Address Box -->
             <div class="col-md-6">
@@ -311,10 +448,36 @@ h2, h4 {
 
    
 </div>
+<!-- Modal HTML structure -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage"></p> <!-- Error message will be injected here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+    </div>
+  
+  <!-- Scripts to handle the modal -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
 
 {% endblock %}
 
 {% block js %}
+<!-- Bootstrap CSS -->
+
+<!-- Bootstrap JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
@@ -373,5 +536,62 @@ h2, h4 {
 });
 
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const couponInput = document.getElementById('couponCode');
+        const copyButtons = document.querySelectorAll('.copy-btn');
+
+        // Copy coupon functionality
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const couponCode = btn.getAttribute('data-coupon');
+                
+                // Copy to clipboard
+                navigator.clipboard.writeText(couponCode).then(() => {
+                    // Temporarily change icon to checkmark
+                    const icon = btn.querySelector('i');
+                    icon.classList.remove('bi-copy');
+                    icon.classList.add('bi-check-all', 'text-success');
+                    
+                    // Automatically fill input
+                    couponInput.value = couponCode;
+                    
+                    // Revert back after 2 seconds
+                    setTimeout(() => {
+                        icon.classList.remove('bi-check-all', 'text-success');
+                        icon.classList.add('bi-copy');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            });
+        });
+
+        // Optional: Handle selecting coupon from dropdown
+        const couponItems = document.querySelectorAll('.coupon-code');
+        couponItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                couponInput.value = e.target.textContent;
+            });
+        });
+    });
+</script>
+{% if messages %}
+  <script>
+    // Display the modal if a message exists
+    var modal = new bootstrap.Modal(document.getElementById('errorModal'));
+    var errorMessage = document.getElementById('errorMessage');
+
+    {% for message in messages %}
+      if ("{{ message.tags }}" === "error") {
+        errorMessage.innerText = "{{ message }}";  // Set the error message
+        modal.show();  // Show the modal
+      }
+    {% endfor %}
+  </script>
+{% endif %}
 
 {% endblock %}

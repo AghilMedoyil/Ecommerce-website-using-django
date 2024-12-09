@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.contrib import messages
 from cart.models import Orders,order_item
-from home.models import Wallet
+from home.models import Wallet,WalletTransaction
 from django.http import JsonResponse
 from cart.models import Coupons
 from home.models import Notification
@@ -27,7 +27,22 @@ from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 
 
+from .forms import MultiImageForm
 
+def photo_list(request):
+    photos = multiimage.objects.all()  # Fetch all images
+    if request.method == 'POST':
+        form = MultiImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()  # Save the image with cropping/resizing if applicable
+            return redirect('photo_list')  # Replace with your URL name for this view
+    else:
+        form = MultiImageForm()
+
+    return render(request, 'photo_list.html', {
+        'form': form,
+        'photos': photos
+    })
 
 # Create your views here.
 # product management
@@ -111,7 +126,7 @@ def add_product(request):
             
 
         #handling the additional image files
-        multipleimages=request.FILES.getlist('images')
+        multipleimages=request.FILES.getlist('additional_images[]')
         for img in multipleimages:
             multiimage.objects.create(product=products,img=img)
 
@@ -119,7 +134,7 @@ def add_product(request):
         
     categories=Category.objects.all()
     brand=Brand.objects.all()
-    return render(request,'admin/add_product.html',{'categories':categories,'brands':brand})
+    return render(request,'admin/add_product.html',{'categories':categories,'brands':brand,'range_obj': range(3)})
 
 @user_passes_test(is_superuser, login_url='signin')
 def update_product(request,id):
@@ -254,10 +269,12 @@ def add_brand(request):
     if request.method =='POST':
         Name=request.POST.get('name')
         description=request.POST.get('description')
+        image=request.FILES.get('image') if 'image' in request.FILES else None
 
         Brand.objects.get_or_create(
             Name=Name,
             description=description,
+            image=image,
         )
         return redirect('brand_list')
 
@@ -270,6 +287,10 @@ def update_brand(request,id):
         name=request.POST.get('name')
         description=request.POST.get('description')
         status=request.POST.get('status')
+        image=request.FILES.get('image') if 'image' in request.FILES else None
+
+        if image:
+            brand.image=image
 
         brand.Name=name
         brand.description=description
@@ -367,8 +388,11 @@ def cancel_orders(request,id):
         print(f"Before Update: Order Status: {order_item.order_status}, Payment Method: {order_item.payment_method}")
         if order_item.order_status=='Delivered':
             order_item.order_status='Return'
+            wallet.balance+=order_item.grand_total
+            wallet.save()
         elif order_item.order_status in ['pending','Dispatch'] and order_item.payment_method=='cod':
             order_item.order_status='Cancelled'
+            
         elif order_item.order_status in ['pending','Dispatch'] and order_item.payment_method=='paypal':
             order_item.order_status='Refund'
             wallet.balance+=order_item.grand_total
@@ -383,7 +407,12 @@ def cancel_orders(request,id):
             message=f"Your order #{order_item.id} has been successfully cancelled.",
             is_read=False
         )
-        print(f"After Update: Order Status: {order_item.order_status}, Cancellation Status: {order_item.cancellation_status}")
+       
+        WalletTransaction.objects.create(wallet=wallet,
+        transaction_type ='CREDIT',
+        amount=order_item.grand_total,
+        description='Refund',
+        )
         return redirect('order_management')
     
 @user_passes_test(is_superuser, login_url='signin')   
@@ -413,62 +442,129 @@ def view_orders(request,id):
 def productOffer(request):
     products=product.objects.all()
     offer=ProductOffer.objects.all()
-    print(offer)
+    active_offers_count = ProductOffer.objects.filter(is_active=True).count()
+    inactive_offers_count = ProductOffer.objects.filter(is_active=False).count()
+   
 
     context={
         'products':products,
         'offers':offer,
+        'active_offers':active_offers_count,
+        'inactive_offers':inactive_offers_count,
     }
     
     return render(request,'admin/offer_management.html',context)
 
 # views.py
-@require_http_methods(["POST"])
+@user_passes_test(is_superuser, login_url='signin')   
 def add_offer(request):
-    try:
+    products=product.objects.all()
+    context={
+        'products':products,
+
+    }
+    if request.method == 'POST':
         # Get form data
         name = request.POST.get('offer_name')
         discount = request.POST.get('discount_value')
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
         description = request.POST.get('description')
-        selected_products = request.POST.getlist('selected_products[]')
+        selected_product = request.POST.get('selected_product')  # Single product ID
+        is_active  = request.POST.get('is_active')
 
-        # Validate data
-        if not all([name, discount, start_date, end_date]):
-            return JsonResponse({
-                'success': False,
-                'message': 'All fields are required.'
-            })
+        is_active = True if is_active else False
+        
+        messages.get_messages(request).used = True
 
-        if not selected_products:
-            return JsonResponse({
-                'success': False,
-                'message': 'Please select at least one product.'
-            })
+     
 
         # Create an offer for each selected product
-        for product_id in selected_products:
-            ProductOffer.objects.create(
-                name=name,
-                discount=discount,
-                start_date=start_date,
-                end_date=end_date,
-                description=description,
-                Product_id=product_id  # Using _id suffix for ForeignKey
-            )
+        productt = product.objects.get(id=selected_product)
 
-        return JsonResponse({
-            'success': True,
-            'message': 'Offers created successfully!'
-        })
+        if start_date>end_date:
+            messages.error(request,'Start date cannot be after end date')
+            return render(request,'admin/add_productoffer.html',context)
 
-    except Exception as e:
-        print(f"Error creating offer: {str(e)}")  # Debug print
-        return JsonResponse({
-            'success': False,
-            'message': f'Error creating offer: {str(e)}'
-        })
+        
+                # Check if the product already has an offer
+        if ProductOffer.objects.filter(Product=productt).exists():
+               messages.error(request,'Product has already one offer')
+               return render(request,'admin/add_productoffer.html',context)
+      
+        ProductOffer.objects.create(
+            name=name,
+            discount=discount,
+            start_date=start_date,
+            end_date=end_date,
+            description=description,
+            Product=productt,
+            is_active=is_active,  
+        )
+       
+
+        return redirect('product_offer')
+   
+    return render(request,'admin/add_productoffer.html',context)
+
+@user_passes_test(is_superuser, login_url='signin')
+def edit_offer(request,id):
+    products=product.objects.all()
+    offers=get_object_or_404(ProductOffer,id=id)
+    context={
+        'products':products,
+        'offers':offers,
+    }
+    if request.method=='POST':
+
+        name = request.POST.get('offer_name')
+        discount = request.POST.get('discount_value')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        description = request.POST.get('description')
+        selected_product = request.POST.get('selected_product')
+        is_active  = request.POST.get('is_active')
+        
+
+        messages.get_messages(request).used = True
+
+        offers.is_active = True if is_active else False
+        existed_product=offers.Product
+
+        productt = product.objects.get(id=selected_product)
+
+        if start_date>end_date:
+            messages.error(request,'Start date cannot be after end date')
+            return render(request,'admin/edit_productoffer.html',context)
+        
+        if ProductOffer.objects.filter(Product=productt).exists() and existed_product!=productt:
+               messages.error(request,'Product has already one offer')
+               return render(request,'admin/edit_productoffer.html',context)
+
+        
+
+        offers.name=name
+        offers.discount=discount
+        offers.start_date=start_date
+        offers.end_date=end_date
+        offers.description=description
+        offers.Product=productt  
+
+        offers.save()
+
+        return redirect('product_offer')
+    
+
+ 
+    return render(request,'admin/edit_productoffer.html',context)
+@user_passes_test(is_superuser, login_url='signin')
+def delete_offer(request, offer_id):
+    if request.method == "POST":
+        offer = get_object_or_404(ProductOffer, id=offer_id)
+        offer.delete()
+        
+        return redirect('product_offer')  # Replace with the URL name of your main product offer page
+    return redirect('product_offer')
 
 @user_passes_test(is_superuser, login_url='signin')
 def coupons(request):
@@ -484,11 +580,23 @@ def coupons(request):
     return render(request,'admin/coupon.html',context)
 @user_passes_test(is_superuser, login_url='signin')
 def add_coupon(request):
+    messages.get_messages(request).used = True
     if request.method == "POST":
+        
+
         code = request.POST.get('code')
         discount=request.POST.get('discount')
         valid_from = request.POST.get('valid_from')
         valid_to = request.POST.get('valid_to')
+        usage = request.POST.get('usage')
+
+        
+
+        if Decimal(discount) < 0 or Decimal(usage) < 0:
+            messages.error(request, "Enter a positive number")
+            return redirect('add_coupon')  # Assuming you have a page for adding a coupon
+
+
 
         # Check if the code already exists
         if Coupons.objects.filter(code=code).exists():
@@ -506,14 +614,70 @@ def add_coupon(request):
             valid_from=valid_from,
             valid_to=valid_to,
             discount_percentage=discount,
+            maximum_usage_count=usage,
         )
         coupon.save()
 
      
-        messages.success(request, f"Coupon '{code}' created successfully!")
+       
         return redirect('coupons')  
-    else:
+    
+    return render(request,'admin/add_coupon.html')
+    
+
+@user_passes_test(is_superuser, login_url='signin')
+def edit_coupon(request,id):
+    coupon=get_object_or_404(Coupons,id=id)
+    context={
+        'coupon':coupon,
+    }
+    if request.method == "POST":
+        
+        code = request.POST.get('code')
+        discount=request.POST.get('discount')
+        valid_from = request.POST.get('valid_from')
+        valid_to = request.POST.get('valid_to')
+        usage = request.POST.get('usage')
+
+        messages.get_messages(request).used = True
+
+        existed_code=coupon.code
+
+        # Check if the code already exists
+        if Coupons.objects.filter(code=code).exists() and code != existed_code:
+            messages.error(request, "This coupon code already exists.")
+            return render(request,'admin/edit_coupon.html',context)  
+
+
+
+        # Create the new coupon
+        
+        coupon.code=code
+        coupon.valid_from=valid_from
+        coupon.valid_to=valid_to
+        coupon.discount_percentage=discount
+        coupon.maximum_usage_count=usage
+        
+        coupon.save()
+
+     
+     
         return redirect('coupons')  
+    
+
+    return render(request,'admin/edit_coupon.html',context)
+
+
+@user_passes_test(is_superuser, login_url='signin')
+def delete_coupon(request,id):
+    if request.method == "POST":
+        coupon = get_object_or_404(Coupons, id=id)
+        coupon.delete()
+        
+        return redirect('coupons')  
+    return redirect('coupons')
+
+
 @user_passes_test(is_superuser, login_url='signin')
 def dashboard(request):
     report_type = request.GET.get('report_type', 'daily')

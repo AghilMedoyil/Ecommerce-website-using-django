@@ -11,15 +11,16 @@ from django.db.models.functions import Lower
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Notification,Wallet
+from .models import Notification,Wallet,WalletTransaction
 # Create your views here.
 @login_required(login_url='signin')
-@never_cache
+
 def index(request):
     
     latest_products=product.objects.order_by('-created_at')
+    brands=Brand.objects.all()
    
-    return render(request,'index.html',{'latest':latest_products})
+    return render(request,'index.html',{'latest':latest_products,'brands':brands})
 
 
 
@@ -108,7 +109,15 @@ def remove_notification(request, notification_id):
 @login_required(login_url='signin')
 def product_details(request,id,varient):
 
+    
+
     Product = get_object_or_404(product, id=id)
+    breadcrumbs = [
+        {"name": "Home", "url": "/home/"},
+        {"name": Product.category.Name, "url": f"/products/?category={Product.category.id}"} 
+
+
+    ]
     
     # Fetch all unique sizes for this product's variants
     sizes = Product.varients.values_list('size', flat=True).distinct()  # Correct way to access related varients
@@ -139,7 +148,8 @@ def product_details(request,id,varient):
         'variant_price': variant_price,
         'variant_quantity': variant_quantity,
         'offer':product_offer,
-        'wishlist_item':wishlist_product_ids
+        'wishlist_item':wishlist_product_ids,
+        "breadcrumbs": breadcrumbs,
     }
 
     return render(request, 'product_details.html', context)
@@ -170,4 +180,13 @@ def searchbar(request):
 
 def wallet(request):
     wallet,created=Wallet.objects.get_or_create(user=request.user)
-    return render(request,'wallet.html',{'wallet':wallet})
+    
+    wallet_transactions=WalletTransaction.objects.filter(wallet=wallet)
+    
+    breadcrumbs = [
+    {"name": "Home", "url": "/home/"},
+
+    {"name": "Account", "url": "/account/"},
+
+    ]
+    return render(request,'wallet.html',{'wallet':wallet,'wallet_transactions':wallet_transactions,"breadcrumbs": breadcrumbs})

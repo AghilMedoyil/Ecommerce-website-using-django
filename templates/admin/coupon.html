@@ -7,9 +7,9 @@
     <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Coupon Management</h2>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCouponModal">
+        <a href="{% url 'add_coupon' %}" class="btn btn-primary" >
             <i class="fas fa-plus me-2"></i>Add New Coupon
-        </button>
+        </a>
     </div>
 
     <!-- Stats Cards -->
@@ -42,7 +42,7 @@
                 </div>
             </div>
         </div> -->
-        <!-- <div class="col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6">
             <div class="card border-0 bg-warning bg-opacity-10 h-100">
                 <div class="card-body">
                     <h6 class="text-warning">Expiring Soon</h6>
@@ -50,7 +50,7 @@
                     <p class="small text-muted mb-0">Next 7 days</p>
                 </div>
             </div>
-        </div> -->
+        </div>
         <!-- <div class="col-xl-3 col-md-6">
             <div class="card border-0 bg-info bg-opacity-10 h-100">
                 <div class="card-body">
@@ -87,7 +87,7 @@
                             </td>
                             <td>{{ c.discount_percentage }}%</td>
                            
-                            <td></td>
+                            <td>{{ c.maximum_usage_count }}</td>
                             <td>{{ c.valid_to }}</td>
                             <td>
                                {% if c.is_active %}
@@ -97,12 +97,19 @@
                                 {% endif %}
                             </td>
                             <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-link text-dark">
+                                <div class="btn-group">
+                                <a href="{% url 'edit_coupon' c.id %}" class="btn btn-sm btn-link text-dark">
+                               
+                                
                                     <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-link text-danger">
+                                </a>
+                          <form action="{% url 'delete_coupon' c.id %}" method="post">
+                            {% csrf_token %}
+                                <button class="btn btn-sm btn-link text-danger" type="submit">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                            </form>
+                        </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -114,49 +121,5 @@
     </div>
 </div>
 
-<!-- Add Coupon Modal -->
-<div class="modal fade" id="addCouponModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add New Coupon</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_coupon' %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Coupon Code</label>
-                        <input type="text" class="form-control" placeholder="Enter coupon code" name="code">
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Discount Value</label>
-                            <input type="number" class="form-control" placeholder="Enter value" name="discount">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Valid From</label>
-                            <input type="date" class="form-control" name="valid_from">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Valid Until</label>
-                            <input type="date" class="form-control" name="valid_to">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Usage Limit</label>
-                        <input type="number" class="form-control" placeholder="Enter usage limit" name="usage">
-                    </div>
-                
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Create Coupon</button>
-            </div>
-        </form>
-        </div>
-    </div>
-</div>
+
 {% endblock %}

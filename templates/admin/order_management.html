@@ -56,8 +56,8 @@
                         <!-- Options for all other order statuses -->
                         <select name="status" class="form-select" onchange="this.form.submit()">
                             <option value="Pending" {% if order.order_status == 'Pending' %}selected{% endif %}>Pending</option>
-                            <option value="Confirmed" {% if order.order_status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
-                            <option value="Dispatch" {% if order.order_status == 'Dispatch' %}selected{% endif %}>Dispatched</option>
+                           
+                            <option value="Dispatch" {% if order.order_status == 'Dispatch' %}selected{% endif %}>Dispatch</option>
                             <option value="Delivered" {% if order.order_status == 'Delivered' %}selected{% endif %}>Delivered</option>
                             
                         </select>

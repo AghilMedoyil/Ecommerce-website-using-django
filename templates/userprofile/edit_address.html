@@ -1,110 +1,226 @@
-{% extends 'userprofile/user_base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block style %}
+{% block styles %}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
 <style>
     .red-text {
-    color: orangered;
+        color: orangered;
+    }
+    .edit-address-container {
+        max-width: 800px;
+        margin: 30px auto;
+    }
+    .card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .card-body {
+        padding: 2rem;
+    }
+    .card-title {
+        color: #dc3545;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    .form-label {
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.774);
+        margin-bottom: 0.5rem;
+    }
+    .form-control {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 0.625rem 1rem;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem #dc35465e;
+    }
+    .form-control::placeholder {
+        color: #adb5bd;
+    }
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px 12px;
+        padding-right: 2.5rem;
+    }
+    .btn-update {
+        background-color: #dc3545;
+        border: none;
+        padding: 0.625rem 2rem;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    .btn-update:hover {
+        background-color: #dc3546d5;
+        transform: translateY(-1px);
+    }
+    .address-section {
+        margin-bottom: 2rem;
+    }
+    .input-group {
+        margin-bottom: 1.5rem;
+    }
+    .alert {
+        border-radius: 6px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    #state {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 0.625rem 1rem;
+        color: #333;
+        background-color: white;
+    }
+    /* Breadcrumbs */
+nav[aria-label="breadcrumb"] {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 14px;
 }
-       
+
+.breadcrumb-item {
+    display: inline;
+    font-weight: 500;
+}
+
+.breadcrumb-item a {
+    color: #dc3545; /* Green links */
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+    color: #dc3545; /* Darker green on hover */
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+    font-weight: bold;
+}
 </style>
 {% endblock %}
-{% block main %}
-<div class="container">
-    
-    <div class="col-12 col-lg-8 p-0  content-column">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="h4 mb-3">Edit Address</h2>
-                <form method="post">
-                    {% csrf_token %}
-                    <!-- Personal Information Section -->
-                    <div class="col-md-12">
-                        <label for="ad-1" class="form-label">Address Line 1</label>
-                        <input type="text" class="form-control" id="ad-1" name="ad-1" 
-                        value="{{ address.address1 }}" placeholder="{{ address.address1 }}" required>
-                    </div>   <div class="col-md-12">
-                        <label for="ad-2" class="form-label">Address Line 2</label>
-                        <input type="text" class="form-control" id="ad-2" name="ad-2" 
-                        value="{{ address.address2 }}" placeholder="{{ address.address2 }}"        required>
-                    </div>
-                   
-                    
 
-                    <!-- Contact Information Section -->
-                    <div class="mb-3">
-                        
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <label for="district" class="form-label">District</label>
-                                <input type="text" class="form-control" id="district" name="district" 
-                                value="{{ address.district }}" placeholder="{{ address.district }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <!-- State Dropdown -->
-                                <label for="state">State</label>
-                                <select name="state" id="state" required>
-                                    <option value="{{ address.state }}">{{ address.state }}</option>
-                                    <option value="Andhra Pradesh">Andhra Pradesh</option>
-                                    <option value="Bihar">Bihar</option>
-                                    <option value="Delhi">Delhi</option>
-                                    <option value="Gujarat">Gujarat</option>
-                                    <option value="Karnataka">Karnataka</option>
-                                    <option value="Kerala">Kerala</option>
-                                    <option value="Maharashtra">Maharashtra</option>
-                                    <option value="Tamil Nadu">Tamil Nadu</option>
-                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
-                                <!-- Add more states as needed -->
-                                </select><br><br>
-                            </div>
-                        </div>
-                    </div>
-                   
-
-                    <div class="mb-3">
-                        
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <label for="city" class="form-label">City</label>
-                                <input type="text" class="form-control" id="city" name="city" 
-                                value="{{ address.city }}" placeholder="{{ address.city }}"required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="zip_code" class="form-label">Pin code</label>
-                                <input type="text" class="form-control" id="pincode" name="pincode"
-                                value="{{ address.pincode }}" placeholder="{{ address.pincode }}" required>
-                            </div>
-                        </div>
-                    </div>
-                    {% if messages %}
-                    <div class="messages">
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} red-text">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
+{% block content %}
+<div class="container edit-address-container">
+    <!-- Breadcrumb -->
+    {% if breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% for crumb in breadcrumbs %}
+                {% if crumb.url %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                    </li>
+                {% else %}
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {{ crumb.name }}
+                    </li>
                 {% endif %}
-                    <!-- Address Section -->
-                   
+            {% endfor %}
+        </ol>
+    </nav>
+    {% endif %}
 
-                    <!-- Form Buttons -->
-                    <div class="content-update">
-                       
-                        <button type="submit" class="btn btn-primary">
-                            Update
-                        </button>
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">Edit Address</h2>
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="address-section">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label for="ad-1" class="form-label">Address Line 1</label>
+                            <input type="text" class="form-control" id="ad-1" name="ad-1" 
+                                value="{{ address.address1 }}" placeholder="Street address or P.O. Box" required>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="ad-2" class="form-label">Address Line 2</label>
+                            <input type="text" class="form-control" id="ad-2" name="ad-2" 
+                                value="{{ address.address2 }}" placeholder="Apt, suite, unit, building, floor, etc." required>
+                        </div>
                     </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="address-section">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="district" class="form-label">District</label>
+                            <input type="text" class="form-control" id="district" name="district" 
+                                value="{{ address.district }}" placeholder="Enter district" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="state" class="form-label">State</label>
+                            <select name="state" id="state" class="form-select" required>
+                                <option value="{{ address.state }}" selected>{{ address.state }}</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="city" name="city" 
+                                value="{{ address.city }}" placeholder="Enter city" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="pincode" class="form-label">PIN Code</label>
+                            <input type="text" class="form-control" id="pincode" name="pincode"
+                                value="{{ address.pincode }}" placeholder="Enter PIN code" required>
+                        </div>
+                    </div>
+                </div>
+
+                {% if messages %}
+                <div class="messages mb-4">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} red-text">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'manage_address' %}" class="btn btn-light me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-update">
+                        Update Address
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-
 </div>
 {% endblock %}
-{% block js %}
-    <!-- Bootstrap Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
 
+{% block js %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
 {% endblock %}

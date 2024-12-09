@@ -1,222 +1,200 @@
-{% extends 'userprofile/user_base.html' %}
+{% extends 'base.html' %}
 {% load static %}
-{% block style %}
-<style>
-       .profile-main-content {
-            padding: 2rem;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            min-width: 100vh;
-            margin-left: 70px;
-            height: auto;
-        }
+{% block styles %}
 
-        .content-title {
-            color: #1e293b;
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    <style>
+      
+   
+        .page-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #dc3545;
         }
+        .address-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .address-card {
+    border: 1px solid #D5D9D9;
+    border-radius: 8px;
+    padding: 20px;
+    background: #fff;
+    height: 100%;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Add smooth transition */
+}
 
-        .address-list {
+.address-card:hover {
+    transform: scale(1.05); /* Slight zoom effect */
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Add subtle shadow for effect */
+}
+
+        .add-address-card {
+            border: 2px dashed #D5D9D9;
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .address-item {
-            background: linear-gradient(145deg, #ffffff, #f8f9fa);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 10px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .address-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .address-type {
-            color: #2563eb;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            color: #0F1111;
+            min-height: 260px;
         }
-
-        .address-text {
-            color: #4b5563;
-            font-size: 1rem;
-            line-height: 1.5;
-            margin-bottom: 1.25rem;
+        .add-address-card:hover {
+            border-color: #dc3545;
+            color: #0F1111;
         }
-
-        .btn-action {
-            padding: 0.5rem 1.25rem;
-            font-weight: 500;
-            border-radius: 6px;
-            transition: all 0.3s ease;
+        .add-icon {
+            font-size: 40px;
+            color: #555;
+            margin-bottom: 10px;
         }
-
-        .btn-edit {
-            background-color: #ffffff;
-            color: #2563eb;
-            border: 1px solid #2563eb;
-            margin-right: 0.75rem;
+        .default-badge {
+            background-color: #F0F2F2;
+            color: #0F1111;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-bottom: 10px;
         }
-
-        .btn-edit:hover {
-            background-color: #2563eb;
-            color: #ffffff;
+        .address-name {
+            font-weight: bold;
+            margin-bottom: 5px;
         }
-
-        .btn-delete {
-            background-color: #ffffff;
-            color: #dc2626;
-            border: 1px solid #dc2626;
+        .address-details {
+            font-size: 14px;
+            margin-bottom: 15px;
         }
-
-        .btn-delete:hover {
-            background-color: #dc2626;
-            color: #ffffff;
-        }
-
-        .btn-add {
-            background-color: #059669;
-            color: #ffffff;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            margin-top: 1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-add:hover {
-            background-color: #047857;
-            transform: translateY(-1px);
-        }
-
         .address-actions {
-            display: flex;
-            align-items: center;
+            margin-top: 15px;
         }
-
-        @media (max-width: 768px) {
-            .profile-main-content {
-                padding: 1.5rem;
-            }
-            
-            .address-actions {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 0.5rem;
-            }
-            
-            .btn-action {
-                width: 100%;
-                margin-right: 0;
-            }
+        .address-actions a {
+            color: #007185;
+            text-decoration: none;
+            font-size: 14px;
         }
+        .address-actions a:hover {
+            color: #C45500;
+            text-decoration: underline;
+        }
+        .separator {
+            color: #565959;
+            margin: 0 8px;
+        }
+        .add-instructions {
+            color: #007185;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .add-instructions:hover {
+            color: #C45500;
+            text-decoration: underline;
+        }
+        /* Breadcrumbs */
+nav[aria-label="breadcrumb"] {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 14px;
+}
 
+.breadcrumb-item {
+    display: inline;
+    font-weight: 500;
+}
 
-</style>
+.breadcrumb-item a {
+    color: #dc3545; /* Blue links */
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+    color: #dc3545; /* Darker blue on hover */
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+    font-weight: bold;
+}
+    </style>
 {% endblock %}
-{% block main %}
 
-<div class="profile-main-content">
-    <h2 class="content-title">Manage Addresses</h2>
-    <div class="address-list">
-        {% for address in address %}
-        <div class="address-item">
-            <h3 class="address-type">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                {{ address.address_type }} Address
-            </h3>
-            <p class="address-text">{{ address.address1 }}</p>
-            <p class="address-text">{{ address.address2 }}</p>
-            <p class="address-text">
-                {{ address.city }}, {{ address.district }}, {{ address.state }} - {{ address.pincode }}
-            </p>
-            <div class="address-actions">
-                <a href="{% url 'edit_address' address.id %}" class="btn btn-action btn-edit">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="me-1">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit
-                </a>
-                
-                <!-- Button to trigger modal -->
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAddressModal{{ address.id }}">
-                    Delete
-                </button>
-            </div>
-        </div>
+{% block content %}
 
-        <!-- Delete Address Modal -->
-        <div class="modal fade" id="deleteAddressModal{{ address.id }}" tabindex="-1" aria-labelledby="deleteAddressModalLabel{{ address.id }}" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteAddressModalLabel{{ address.id }}">Confirm Delete Address</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-warning" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            Are you sure you want to delete this address? This action cannot be undone.
-                        </div>
-                        <div class="address-details">
-                            <p><strong>Address to be deleted:</strong></p>
-                            <p>{{ address.address1 }}, {{ address.address2 }}<br>
-                            {{ address.city }}, {{ address.state }} {{ address.pincode }}<br>
-                            {{ address.country }}</p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form action="{% url 'delete_address' address.id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Delete Address</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <p>No addresses found. Please add a new address.</p>
-        {% endfor %}
-        
-        <!-- Add New Address Button -->
-        <a href="{% url 'add_address' %}" class="btn btn-add">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Add New Address
-        </a>
+    <div class="container mt-4">
+        {% if breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% for crumb in breadcrumbs %}
+                {% if crumb.url %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                    </li>
+                {% else %}
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {{ crumb.name }}
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+    {% endif %}
+
+        <h1 class="page-title">Your Addresses</h1>
+
+        <div class="address-grid">
+            <!-- Add Address Card -->
+            <a href="{% url 'add_address' %}" class="address-card add-address-card">
+                <div class="add-icon">+</div>
+                <div>Add address</div>
+            </a>
+
+            <!-- Default Address Card -->
+            {% for address in address %}
+<div class="address-card">
+    <div class="address-name">{{ address.name }}</div>
+    <div class="address-details">
+        {{ address.address1 }}<br>
+        {{ address.address2 }}<br>
+        {{ address.city }}, {{ address.district }} <br>
+        {{ address.state }} - {{ address.pincode }}<br>
+    </div>
+    <div class="address-actions">
+        <a href="{% url 'edit_address' address.id %}">Edit</a>
+        <span class="separator">|</span>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAddressModal{{ address.id }}">
+            Delete
+        </button>
     </div>
 </div>
 
+<!-- Delete Modal for Each Address -->
+<div class="modal fade" id="deleteAddressModal{{ address.id }}" tabindex="-1" aria-labelledby="deleteAddressModalLabel{{ address.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAddressModalLabel{{ address.id }}">Delete Address</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this address?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'delete_address' address.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
-{% endblock %}
-{% block js %}
-<script>
- // Ensure JavaScript runs after all modals are rendered
- document.querySelectorAll('.modal').forEach(modalElement => {
-        modalElement.addEventListener('shown.bs.modal', function () {
-            console.log('Modal shown: ' + this.id);
-        });
-    });
-</script>
-
+</div>
+</div>
 {% endblock %}

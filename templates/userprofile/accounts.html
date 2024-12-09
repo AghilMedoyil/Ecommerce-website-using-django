@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block styles %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+/* Ensure all boxes have a uniform size */
+.account-box {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  min-height: 200px; /* Ensures uniform height */
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.account-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon styling */
+.box-icon i {
+  font-size: 3rem; /* Bigger icons */
+}
+
+/* Different colors for each box */
+.text-primary {
+  color: #0d6efd;
+}
+.text-danger {
+  color: #dc3545;
+}
+.text-warning {
+  color: #ffc107;
+}
+.text-success {
+  color: #28a745;
+}
+/* Remove default link styles */
+.account-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.account-link:hover .account-box {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+</style>
+{% endblock %}
+{% block content %}
+
+
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">Your Account</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      <!-- Orders -->
+      <div class="col">
+        <a href="{% url 'orders_list' %}" class="account-link">
+          <div class="account-box shadow-sm">
+            <div class="box-icon text-center text-primary">
+              <i class="bi bi-box2"></i>
+            </div>
+            <h5 class="text-center mt-2">Orders</h5>
+            <p class="text-center text-muted">Track, return, or buy things again.</p>
+          </div>
+        </a>
+      </div>
+      <!-- Addresses -->
+      <div class="col">
+        <a href="{% url 'manage_address' %}" class="account-link">
+          <div class="account-box shadow-sm">
+            <div class="box-icon text-center text-danger">
+              <i class="bi bi-geo-alt"></i>
+            </div>
+            <h5 class="text-center mt-2">Addresses</h5>
+            <p class="text-center text-muted">Manage delivery addresses.</p>
+          </div>
+        </a>
+      </div>
+      <!-- Change Password -->
+      <div class="col">
+        <a href="/change-password/" class="account-link">
+          <div class="account-box shadow-sm">
+            <div class="box-icon text-center text-warning">
+              <i class="bi bi-shield-lock"></i>
+            </div>
+            <h5 class="text-center mt-2">Change Password</h5>
+            <p class="text-center text-muted">Update your password.</p>
+          </div>
+        </a>
+      </div>
+      <!-- Wallet -->
+      <div class="col">
+        <a href="/wallet/" class="account-link">
+          <div class="account-box shadow-sm">
+            <div class="box-icon text-center text-success">
+              <i class="bi bi-wallet2"></i>
+            </div>
+            <h5 class="text-center mt-2">Wallet</h5>
+            <p class="text-center text-muted">View and manage your wallet.</p>
+          </div>
+        </a>
+      </div>
+      <!-- Profile -->
+      <div class="col">
+        <a href="/profile/" class="account-link">
+          <div class="account-box shadow-sm">
+            <div class="box-icon text-center text-info">
+              <i class="bi bi-person-circle"></i>
+            </div>
+            <h5 class="text-center mt-2">Profile</h5>
+            <p class="text-center text-muted">Update and view your profile.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}

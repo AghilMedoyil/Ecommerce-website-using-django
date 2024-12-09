@@ -162,7 +162,28 @@
 .wish :hover{
     color: orange;
 }
-
+nav[aria-label="breadcrumb"] {
+        
+       
+        border-radius: 8px;
+        font-size: 14px;
+    }
+    .breadcrumb-item {
+        display: inline;
+        font-weight: 500;
+    }
+    .breadcrumb-item a {
+        color: orange;
+        text-decoration: none;
+    }
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+        color: #000;
+    }
+    .breadcrumb-item.active {
+        color: #6c757d;
+        font-weight: bold;
+    }
 
 </style>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -191,12 +212,23 @@
 
         <!-- Product Info -->
         <div class="col-md-6">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item active">T-Shirt</li>
-                </ol>
-            </nav>
+            {% if breadcrumbs %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        {% for crumb in breadcrumbs %}
+            {% if crumb.url %}
+                <li class="breadcrumb-item">
+                    <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                </li>
+            {% else %}
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ crumb.name }}
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+</nav>
+{% endif %}
               
 
             

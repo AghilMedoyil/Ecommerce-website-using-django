@@ -11,10 +11,11 @@ from django.conf import settings
 import uuid
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from home.models import Notification,Wallet
+from home.models import Notification,Wallet,WalletTransaction
 from django.core.mail import EmailMessage
 
 from .models import cart,cartitem,Wishlist,WishlistItem
+from django.utils.timezone import now
 # Create your views here.
 @login_required(login_url='signin')
 def view_cart(request):
@@ -84,13 +85,21 @@ def remove_cartitem(request,id):
 def checkout(request):
     
     host= request.get_host()
+    
 
    
     Cart=cart.objects.get(user=request.user)
     Cartitem=cartitem.objects.filter(Cart=Cart)
     order = Orders.objects.all()
-    wallet=Wallet.objects.get(user=request.user)
-
+    wallet,created=Wallet.objects.get_or_create(user=request.user)
+    coupon=Coupons.objects.filter(is_active=True)
+    coupons=[]
+    for c in coupon:
+        used_coupon,coupon_created = coupon_usage.objects.get_or_create(user=request.user,coupon=c)
+        if used_coupon.used_count<c.maximum_usage_count:
+            coupons.append(c)
+   
+   
     address=addresses.objects.filter(user=request.user)
     total_price=sum(item.quantity*item.price for item in Cartitem)   
     discount=0
@@ -111,13 +120,18 @@ def checkout(request):
         'grand_total':grand_total,
         'discount':discount,
         'wallet':wallet,
+        'coupon':coupons,
         
        
     }
-   
+    messages.get_messages(request).used = True
 
     if request.method == 'POST':
         address_id = request.POST.get('address')
+        
+        if not address_id:
+            messages.error(request,'Please add an address first.')
+            return render(request,'checkout.html',context)
        
         Address=addresses.objects.get(id=address_id)
         grand_total=request.POST.get('grand_total')
@@ -125,26 +139,56 @@ def checkout(request):
         discount=request.POST.get('discount')
         wallet=request.POST.get('wallet',0)
         grand_total = Decimal(grand_total)  # Convert grand_total to a float
-        wallet_balance = Decimal(wallet)  # Convert wallet balance to a float
+        # Convert wallet balance to a float
         waalet=Wallet.objects.get(user=request.user)
 
+        coupon_code=request.POST.get('couponCode',None)
+
+
+        
+
+        if coupon_code:
+            coup=Coupons.objects.get(code=coupon_code)
+            used_coupon,created=coupon_usage.objects.get_or_create(user=request.user,coupon=coup)
+            if not created:
+                used_coupon.used_count+=1
+                used_coupon.save()
+
 # Subtract wallet balance from grand total
-        grand = grand_total - wallet_balance
-        if wallet_balance > 0:
-            waalet.balance-=wallet_balance
-            waalet.save()
+
+        if Decimal(wallet)>0:
+            wallet_balance = Decimal(wallet)  
+            if wallet_balance > grand_total :
+                waalet.balance=waalet.balance-grand_total
+                waalet.save()
+                WalletTransaction.objects.create(
+                wallet=waalet,
+                transaction_type ='DEBIT',
+                amount=grand_total,
+                description='PURCHASE',
+                )
+                payment_method = 'wallet'
+                
+                order = create_order(request.user, Address, total, grand_total, discount, shipping_price, tax, Cartitem,payment_method)
+
+                return redirect('order_success' ,id=order.id)
+            else:
+                waalet.balance=0
+                waalet.save()
+                WalletTransaction.objects.create(
+                wallet=waalet,
+                transaction_type ='DEBIT',
+                amount=wallet_balance,
+                description='PURCHASE',
+                )
+
 
 
     
         # Get the selected payment method from the form
         payment_method = request.POST.get('payment_method')
 
-        if grand==0:
-            payment_method = 'wallet'
-            
-            order = create_order(request.user, Address, total, grand_total, discount, shipping_price, tax, Cartitem,payment_method)
-
-            return redirect('order_success' ,id=order.id)
+        
 
 
         if payment_method == 'paypal':
@@ -208,6 +252,8 @@ def create_order(user, Address, total, grand_total, discount, shipping_price, ta
     for item in Cartitem:
         item.varient.stock-=item.quantity
         item.varient.save()
+
+    
     
      # Email details
     subject = f"Order #{order.id} Confirmation"
@@ -223,6 +269,7 @@ def create_order(user, Address, total, grand_total, discount, shipping_price, ta
     </html>
     """
     
+
     # Send email
     email = EmailMessage(
         subject=subject,
@@ -232,6 +279,8 @@ def create_order(user, Address, total, grand_total, discount, shipping_price, ta
     )
     email.content_subtype = 'html'  # Specify email format as HTML
     email.send(fail_silently=False)
+
+    
 
 
     # Optionally clear the cart

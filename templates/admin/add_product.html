@@ -1,7 +1,39 @@
 {% extends 'admin/admin_base.html' %}
 
 {% block title %}Add Product{% endblock %}
-
+{% block styles %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+<style>
+    .img-container {
+        max-width: 100%;
+        max-height: 400px;
+    }
+    .img-preview {
+        width: 200px;
+        height: 200px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+    }
+    #cropperModal .modal-body {
+        max-height: 500px;
+        overflow: hidden;
+    }
+    #cropperModal .modal-body {
+        max-height: 500px;
+        overflow: hidden;
+    }
+    .additional-image-preview {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .additional-image-preview .img-preview {
+        width: 100px;
+        height: 100px;
+    }
+</style>
+{% endblock %}
+ 
 {% block content %}
 <div class="container my-5">
     <h1 class="text-center mb-4">Add New Product</h1>
@@ -44,15 +76,45 @@
         </div>
 
       
-
         <div class="form-group mb-3">
-            <label for="image" class="form-label">Product Image</label>
-            <input type="file" class="form-control" id="image" name="image" required>
+            <label for="image" class="form-label">Product Main Image</label>
+            <input type="file" class="form-control" id="mainImageInput" name="image" accept="image/*" required>
+            
+            <div class="mt-3 d-none" id="mainImagePreviewContainer">
+                <h6>Main Image Preview</h6>
+                <div class="img-preview border"></div>
+                <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#cropperModal" data-image-type="main">
+                    Crop Main Image
+                </button>
+            </div>
         </div>
 
         <div class="form-group mb-3">
-            <label for="images" class="form-label">Additional Images</label>
-            <input type="file" class="form-control" id="images" name="images" multiple>
+            <label class="form-label">Additional Images (3 images required)</label>
+            <div class="row">
+                {% for i in range_obj %}
+                <div class="col-md-4 mb-3">
+                    <input type="file" class="form-control additional-image-input" 
+                           id="additionalImageInput{{ i }}" 
+                           name="additional_images[]" 
+                           accept="image/*" 
+                           required>
+                    
+                    <div class="mt-3 d-none additional-image-preview-container" 
+                         id="additionalImagePreviewContainer{{ i }}">
+                        <div class="img-preview border"></div>
+                        <button type="button" class="btn btn-primary btn-sm mt-2" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#cropperModal" 
+                                data-image-type="additional" 
+                                data-image-index="{{ i }}">
+                            Crop Image
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+                
+            </div>
         </div>
 
         <!-- Variants Card -->
@@ -110,8 +172,243 @@
 </div>
 
 
+<!-- Cropper Modal (Single modal for all image cropping) -->
+<div class="modal fade" id="cropperModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crop Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="img-container">
+                            <img id="cropperImage" src="" alt="Source Image" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="preview-container">
+                            <h6>Preview</h6>
+                            <div class="img-preview"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="applyCropBtn">Apply Crop</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 {% block js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let cropper = null;
+    let currentCropperContext = {
+        type: null,
+        index: null,
+        inputElement: null
+    };
+
+    function handleImageSelection(inputElement, previewContainer) {
+        const files = inputElement.files;
+        if (files && files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewContainer.classList.remove('d-none');
+                const previewImg = previewContainer.querySelector('.img-preview');
+                previewImg.style.backgroundImage = `url('${e.target.result}')`;
+                previewImg.style.backgroundSize = 'cover';
+                previewImg.style.backgroundPosition = 'center';
+            };
+            reader.readAsDataURL(files[0]);
+        }
+    }
+
+    // Clear previous cropper instance
+    function clearCropper() {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        const cropperImage = document.getElementById('cropperImage');
+        cropperImage.src = '';
+    }
+
+    // Initialize new cropper
+    function initCropper(imageUrl) {
+        clearCropper();
+        const cropperImage = document.getElementById('cropperImage');
+        cropperImage.src = imageUrl;
+        
+        cropper = new Cropper(cropperImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            preview: '.modal .img-preview',
+            guides: true,
+            background: false,
+            autoCropArea: 1
+        });
+    }
+
+    // Main image input handler
+    const mainImageInput = document.getElementById('mainImageInput');
+    const mainPreviewContainer = document.getElementById('mainImagePreviewContainer');
+    
+    mainImageInput.addEventListener('change', function() {
+        handleImageSelection(this, mainPreviewContainer);
+    });
+
+    // Additional image input handlers
+    document.querySelectorAll('.additional-image-input').forEach((input, index) => {
+        const previewContainer = document.getElementById(`additionalImagePreviewContainer${index}`);
+        input.addEventListener('change', function() {
+            handleImageSelection(this, previewContainer);
+        });
+    });
+
+    // Modal open handler with improved context management
+    const cropperModal = document.getElementById('cropperModal');
+    cropperModal.addEventListener('show.bs.modal', function(event) {
+        clearCropper(); // Clear any existing cropper instance
+        
+        const button = event.relatedTarget;
+        const imageType = button.getAttribute('data-image-type');
+        const imageIndex = button.getAttribute('data-image-index');
+        
+        // Set current context
+        currentCropperContext = {
+            type: imageType,
+            index: imageIndex ? parseInt(imageIndex) : null,
+            inputElement: imageType === 'main' 
+                ? mainImageInput 
+                : document.getElementById(`additionalImageInput${imageIndex}`)
+        };
+
+        // Initialize cropper with the selected image
+        if (currentCropperContext.inputElement && currentCropperContext.inputElement.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                initCropper(e.target.result);
+            };
+            reader.readAsDataURL(currentCropperContext.inputElement.files[0]);
+        }
+    });
+
+    // Modal close handler
+    cropperModal.addEventListener('hidden.bs.modal', function() {
+        clearCropper();
+        currentCropperContext = {
+            type: null,
+            index: null,
+            inputElement: null
+        };
+    });
+
+    // Apply crop button handler
+    document.getElementById('applyCropBtn').addEventListener('click', function() {
+        if (!cropper || !currentCropperContext.inputElement) {
+            alert('Please select an image first');
+            return;
+        }
+
+        cropper.getCroppedCanvas({
+            width: 800,
+            height: 800,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        }).toBlob(function(blob) {
+            const croppedFile = new File([blob], 'cropped_image.jpg', {
+                type: 'image/jpeg'
+            });
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(croppedFile);
+            
+            currentCropperContext.inputElement.files = dataTransfer.files;
+
+            // Update the correct preview
+            const previewContainer = currentCropperContext.type === 'main'
+                ? mainPreviewContainer
+                : document.getElementById(`additionalImagePreviewContainer${currentCropperContext.index}`);
+            
+            const previewImg = previewContainer.querySelector('.img-preview');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.style.backgroundImage = `url('${e.target.result}')`;
+            };
+            reader.readAsDataURL(croppedFile);
+
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(cropperModal);
+            modal.hide();
+        }, 'image/jpeg');
+    });
+
+
+    // Existing variant JavaScript (keep your previous implementation)
+    const variantsContainer = document.getElementById('variantsContainer');
+    const addVariantBtn = document.getElementById('addVariant');
+
+    addVariantBtn.addEventListener('click', function() {
+        const variantHTML = `
+            <div class="variant-item border rounded p-3 mb-3">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Size</label>
+                        <select class="form-select" name="varient_size[]">
+                            <option value="S">Small</option>
+                            <option value="M">Medium</option>
+                            <option value="L">Large</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" class="form-control" name="varient_price[]" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Stock</label>
+                        <input type="number" class="form-control" name="varient_stock[]" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" class="btn btn-danger d-block w-100 remove-variant">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        variantsContainer.insertAdjacentHTML('beforeend', variantHTML);
+    });
+
+    // Event delegation for remove buttons
+    variantsContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-variant')) {
+            e.target.closest('.variant-item').remove();
+        }
+    });
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const variantsContainer = document.getElementById('variantsContainer');

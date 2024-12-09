@@ -12,14 +12,36 @@ from reportlab.lib import colors
 
 
 # Create your views here.
+
+def account_view(request):
+    return render(request,'userprofile/accounts.html')
 @login_required
 def profile_view(request):
     user=request.user
-    Customer, created = customer.objects.get_or_create(user=user)
+    breadcrumbs = [
+    {"name": "Home", "url": "/home/"},
+
+    {"name": "Account", "url": "/account/"},
+
+
+    ]
+    messages.get_messages(request).used = True
 
     if request.method=='POST':
-        first_name=request.POST.get('first_name')
-        last_name=request.POST.get('last_name')
+        
+        first_name=request.POST.get('first_name','').strip()
+        last_name=request.POST.get('last_name').strip()
+        print(last_name)
+
+        if not first_name:
+            messages.error(request,'Enter a valid first name')
+            return render(request,'userprofile/user_profile.html',{'user':user,"breadcrumbs": breadcrumbs})
+        if not last_name:
+            messages.error(request,'Enter a valid last name')
+
+            return render(request,'userprofile/user_profile.html',{'user':user,"breadcrumbs": breadcrumbs})
+
+        
         
 
         user.first_name=first_name
@@ -29,14 +51,21 @@ def profile_view(request):
         user.save()
         
   
-        return render(request,'userprofile/user_profile.html',{'user':user})
+        return render(request,'userprofile/user_profile.html',{'user':user,"breadcrumbs": breadcrumbs})
     
-    return render(request,'userprofile/user_profile.html',{'user':user})
+    return render(request,'userprofile/user_profile.html',{'user':user,"breadcrumbs": breadcrumbs})
 def orders_list(request):
     user=request.user
+    breadcrumbs = [
+    {"name": "Home", "url": "/home/"},
+
+    {"name": "Account", "url": "/account/"},
+
+    ]
     orders = Orders.objects.filter(user=user).order_by('-order_time')
+    excluded_status=['Cancelled','Refund','Return']
    
-    return render(request,'userprofile/orders_list.html',{'orders':orders})
+    return render(request,'userprofile/orders_list.html',{'excluded_status':excluded_status,'orders':orders,"breadcrumbs": breadcrumbs})
 
 def export_invoice(request, order_id):
     # Get the specific order based on the order ID
@@ -114,14 +143,30 @@ def request_cancel(request,id):
         return redirect('orders_list')
 def manage_address(request):
     address=addresses.objects.filter(user=request.user)
+    breadcrumbs = [
+    {"name": "Home", "url": "/home/"},
+
+    {"name": "Account", "url": "/account/"},
+
+    ]
    
-    return render(request,'userprofile/manage_addresses.html',{'address':address})
+    return render(request,'userprofile/manage_addresses.html',{'address':address,'breadcrumbs':breadcrumbs})
 
 def change_pass(request):
     return render(request,'userprofile/change_pass.html')
 
 def edit_address(request,id):
     Address=get_object_or_404(addresses,id=id)
+    breadcrumbs = [
+    {"name": "Home", "url": "/home/"},
+
+    {"name": "Account", "url": "/account/"},
+    {"name": "Your Address", "url": "/address/"},
+   
+
+
+
+    ]
     if request.method=='POST':
         address1=request.POST.get('ad-1')
         address2=request.POST.get('ad-2')
@@ -153,7 +198,7 @@ def edit_address(request,id):
 
         return redirect('manage_address')
 
-    return render(request,'userprofile/edit_address.html',{'address':Address})
+    return render(request,'userprofile/edit_address.html',{'address':Address,'breadcrumbs':breadcrumbs})
 def add_address(request):
     user=request.user
     

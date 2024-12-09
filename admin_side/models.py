@@ -44,6 +44,7 @@ class Brand(models.Model):
     delete_status=models.IntegerField(choices=DELETE_CHOICES,default=LIVE)
     Name=models.CharField(max_length=200)
     description=models.TextField()
+    image=models.ImageField(upload_to='brands/')
 
     def __str__(self) -> str:
         return self.Name
@@ -107,13 +108,14 @@ class CategoryOffer(models.Model):
     
 class ProductOffer(models.Model):
     Product=models.ForeignKey(product,on_delete=models.CASCADE)
-    Varient=models.ForeignKey(ProductVarient,on_delete=models.CASCADE,related_name='offer')
     discount = models.DecimalField(max_digits=5, decimal_places=2, help_text="Discount percentage")
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     discount_price=models.FloatField(default=0,null=True,blank=True)
     name=models.CharField(max_length=100)
     description=models.TextField()
+    is_active = models.BooleanField(default=True)
+
     
 
   

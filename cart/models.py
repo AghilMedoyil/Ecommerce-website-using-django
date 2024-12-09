@@ -88,6 +88,7 @@ class coupon_usage(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
     coupon=models.ForeignKey(Coupons,on_delete=models.CASCADE)
     used_at = models.DateTimeField(auto_now_add=True)
+    used_count=models.DecimalField(max_digits=10, decimal_places=2, default=1) 
     class Meta:
         unique_together = ['user', 'coupon']
 

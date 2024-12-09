@@ -20,18 +20,19 @@
             <td>{{ user.email }}</td>
             <td>
                 {% if user.is_active %}
-                    <span class="badge badge-success">Active</span>
+                <span class="badge badge-success" style="color: green;">Active</span>
+
                 {% else %}
-                    <span class="badge badge-danger">Blocked</span>
+                    <span class="badge badge-danger" style="color: red;">Blocked</span>
                 {% endif %}
             </td>
             <td>
                 {% if user.is_active %}
                     <!-- Block User Button -->
-                    <button class="btn btn-danger" data-toggle="modal" data-target="#blockUserModal{{ user.id }}">Block</button>
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#blockUserModal{{ user.id }}">Block</button>
                 {% else %}
                     <!-- Unblock User Button -->
-                    <button class="btn btn-success" data-toggle="modal" data-target="#unblockUserModal{{ user.id }}">Unblock</button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#unblockUserModal{{ user.id }}">Unblock</button>
                 {% endif %}
             </td>
         </tr>
