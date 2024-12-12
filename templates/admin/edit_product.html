@@ -1,6 +1,58 @@
+
+
+
 {% extends 'admin/admin_base.html' %}
 
 {% block title %}Edit Product{% endblock %}
+
+{% block styles %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+<style>
+    .img-container {
+        max-width: 100%;
+        max-height: 400px;
+    }
+    .img-preview {
+        width: 200px;
+        height: 200px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        
+    }
+    #cropperModal .modal-body {
+        max-height: 500px;
+        overflow: hidden;
+    }
+    .additional-image-preview {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+       
+    }
+    .additional-image-preview .img-preview {
+        width: 100px;
+        height: 100px;
+    }
+    .existing-image-container {
+        position: relative;
+        display: inline-block;
+        margin: 5px;
+    }
+    .existing-image-container .remove-image {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: red;
+        color: white;
+        border-radius: 50%;
+        padding: 5px 8px;
+        cursor: pointer;
+    }
+    .forrrm{
+        margin-left: -250px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="main-content px-4 py-3">
@@ -12,61 +64,69 @@
             </a>
         </div>
     </div>
+    {% for msg in messages %}
+                    
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong> {{ msg }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+   
+    {% endfor %}
 
-    <!-- Product Edit Form -->
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" class="forrrm">
         {% csrf_token %}
         
-        <!-- Basic Information Card -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Basic Information</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="title" class="form-label">Product Name</label>
-                        <input type="text" class="form-control" id="title" name="title" value="{{ product.title }}" required>
+       
+                <!-- Basic Information Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Basic Information</h5>
                     </div>
-                    
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="title" class="form-label">Product Name</label>
+                                <input type="text" class="form-control" id="title" name="title" value="{{ product.title }}" required>
+                            </div>
+                            
+                        </div>
+        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required>{{ product.description }}</textarea>
+                        </div>
+        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}" {% if product.category.id == category.id %} selected {% endif %}>
+                                            {{ category.Name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="brand" class="form-label">Brand</label>
+                                <select class="form-select" id="brand" name="brand">
+                                    {% for brand in brands %}
+                                        <option value="{{ brand.id }}" {% if product.brand.id == brand.id %} selected {% endif %}>
+                                            {{ brand.Name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="1" {% if product.delete_status == 1 %} selected {% endif %}>LIVE</option>
+                                    <option value="0" {% if product.delete_status == 0 %} selected {% endif %}>DELETE</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4" required>{{ product.description }}</textarea>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <select class="form-select" id="category" name="category">
-                            {% for category in categories %}
-                                <option value="{{ category.id }}" {% if product.category.id == category.id %} selected {% endif %}>
-                                    {{ category.Name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="brand" class="form-label">Brand</label>
-                        <select class="form-select" id="brand" name="brand">
-                            {% for brand in brands %}
-                                <option value="{{ brand.id }}" {% if product.brand.id == brand.id %} selected {% endif %}>
-                                    {{ brand.Name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="status" class="form-label">Status</label>
-                        <select class="form-select" id="status" name="status" required>
-                            <option value="1" {% if product.delete_status == 1 %} selected {% endif %}>LIVE</option>
-                            <option value="0" {% if product.delete_status == 0 %} selected {% endif %}>DELETE</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Images Card -->
         <div class="card shadow-sm mb-4">
@@ -75,31 +135,100 @@
             </div>
             <div class="card-body">
                 <div class="row">
+                    <!-- Main Image -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Main Product Image</label>
                         {% if product.image %}
-                            <div class="mb-2">
+                            <div class="existing-image-container mb-2">
                                 <img src="{{ product.image.url }}" alt="Current" class="img-thumbnail" style="height: 100px;">
+                                <input type="hidden" name="existing_main_image" value="{{ product.image.url }}">
                             </div>
                         {% endif %}
-                        <input type="file" class="form-control" id="image" name="image">
+                        <input type="file" class="form-control" id="mainImageInput" name="image" accept="image/*">
+                        <div class="mt-3 d-none" id="mainImagePreviewContainer">
+                            <h6>New Image Preview</h6>
+                            <div class="img-preview border"></div>
+                            <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#cropperModal" data-image-type="main">
+                                Crop Main Image
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    </div>
+                    <div >
+                    
+
+                    <!-- Additional Images -->
+                    <div class="col">
                         <label class="form-label">Additional Images</label>
-                        <input type="file" class="form-control" id="multiple" name="multiple" multiple>
                         {% if product.additional_images %}
-                            <div class="d-flex gap-2 mt-2">
-                                {% for image in product.additional_images %}
-                                    <img src="{{ image.url }}" alt="Additional" class="img-thumbnail" style="height: 80px;">
+                       
+                            <div class="existing-images-container mb-2">
+                                {% for image in product.additional_images.all %}
+                                    <div class="existing-image-container">
+                                        <img src="{{ image.url }}" alt="Additional" class="img-thumbnail" style="height: 80px;">
+                                        <span class="remove-image" data-image-id="{{ image.id }}">×</span>
+                                        <input type="hidden" name="existing_additional_images[]" value="{{ image.url }}">
+                                    </div>
                                 {% endfor %}
                             </div>
                         {% endif %}
+                        <div class="row">
+                            {% for i in "123"|make_list %}
+                            <div class="col-md-4 mb-3">
+                                <input type="file" class="form-control additional-image-input" 
+                                       id="additionalImageInput{{ forloop.counter0 }}" 
+                                       name="additional_images[]" 
+                                       accept="image/*">
+                                
+                                <div class="mt-3 d-none additional-image-preview-container" 
+                                     id="additionalImagePreviewContainer{{ forloop.counter0 }}">
+                                    <div class="img-preview border"></div>
+                                    <button type="button" class="btn btn-primary btn-sm mt-2" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#cropperModal" 
+                                            data-image-type="additional" 
+                                            data-image-index="{{ forloop.counter0 }}">
+                                        Crop Image
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Variants Card -->
+        <!-- Previous variants card and submit button remain the same -->
+        {% for varient in product.varients.all %}
+        <div class="variant-item border rounded p-3 mb-3">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Size</label>
+                    <select class="form-select" name="varient_size[]">
+                        <option value="S" {% if varient.size == 'S' %}selected{% endif %}>Small</option>
+                        <option value="M" {% if varient.size == 'M' %}selected{% endif %}>Medium</option>
+                        <option value="L" {% if varient.size == 'L' %}selected{% endif %}>Large</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Price</label>
+                    <input type="number" class="form-control" name="varient_price[]" value="{{ varient.price }}" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Stock</label>
+                    <input type="number" class="form-control" name="varient_stock[]" value="{{ varient.stock }}" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" class="btn btn-danger d-block w-100 remove-variant">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+           <!-- Variants Card -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Product Variants</h5>
@@ -140,9 +269,8 @@
                 </div>
             </div>
         </div>
-
-        <!-- Submit Button -->
-        <div class="card shadow-sm mb-4">
+         <!-- Submit Button -->
+         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="bi bi-check-lg"></i> Update Product
@@ -152,19 +280,208 @@
     </form>
 </div>
 
+<!-- Cropper Modal -->
+<div class="modal fade" id="cropperModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crop Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="img-container">
+                            <img id="cropperImage" src="" alt="Source Image" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="preview-container">
+                            <h6>Preview</h6>
+                            <div class="img-preview"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="applyCropBtn">Apply Crop</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% block js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    let cropper = null;
+    let currentCropperContext = {
+        type: null,
+        index: null,
+        inputElement: null
+    };
+
+    // Image handling functions
+    function handleImageSelection(inputElement, previewContainer) {
+        const files = inputElement.files;
+        if (files && files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewContainer.classList.remove('d-none');
+                const previewImg = previewContainer.querySelector('.img-preview');
+                previewImg.style.backgroundImage = `url('${e.target.result}')`;
+                previewImg.style.backgroundSize = 'cover';
+                previewImg.style.backgroundPosition = 'center';
+            };
+            reader.readAsDataURL(files[0]);
+        }
+    }
+
+    function clearCropper() {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        const cropperImage = document.getElementById('cropperImage');
+        cropperImage.src = '';
+    }
+
+    function initCropper(imageUrl) {
+        clearCropper();
+        const cropperImage = document.getElementById('cropperImage');
+        cropperImage.src = imageUrl;
+        
+        cropper = new Cropper(cropperImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            preview: '.modal .img-preview',
+            guides: true,
+            background: false,
+            autoCropArea: 1
+        });
+    }
+
+    // Main image handlers
+    const mainImageInput = document.getElementById('mainImageInput');
+    const mainPreviewContainer = document.getElementById('mainImagePreviewContainer');
+    
+    mainImageInput.addEventListener('change', function() {
+        handleImageSelection(this, mainPreviewContainer);
+    });
+
+    // Additional image handlers
+    document.querySelectorAll('.additional-image-input').forEach((input, index) => {
+        const previewContainer = document.getElementById(`additionalImagePreviewContainer${index}`);
+        input.addEventListener('change', function() {
+            handleImageSelection(this, previewContainer);
+        });
+    });
+
+    // Remove existing image handler
+    document.querySelectorAll('.remove-image').forEach(button => {
+        button.addEventListener('click', function() {
+            const imageId = this.getAttribute('data-image-id');
+            // Add hidden input to track removed images
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'removed_images[]';
+            hiddenInput.value = imageId;
+            this.closest('form').appendChild(hiddenInput);
+            // Remove the image container
+            this.closest('.existing-image-container').remove();
+        });
+    });
+
+    // Modal handlers
+    const cropperModal = document.getElementById('cropperModal');
+    cropperModal.addEventListener('show.bs.modal', function(event) {
+        clearCropper();
+        
+        const button = event.relatedTarget;
+        const imageType = button.getAttribute('data-image-type');
+        const imageIndex = button.getAttribute('data-image-index');
+        
+        currentCropperContext = {
+            type: imageType,
+            index: imageIndex ? parseInt(imageIndex) : null,
+            inputElement: imageType === 'main' 
+                ? mainImageInput 
+                : document.getElementById(`additionalImageInput${imageIndex}`)
+        };
+
+        if (currentCropperContext.inputElement && currentCropperContext.inputElement.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                initCropper(e.target.result);
+            };
+            reader.readAsDataURL(currentCropperContext.inputElement.files[0]);
+        }
+    });
+
+    cropperModal.addEventListener('hidden.bs.modal', clearCropper);
+
+    // Apply crop handler
+    document.getElementById('applyCropBtn').addEventListener('click', function() {
+        if (!cropper || !currentCropperContext.inputElement) {
+            alert('Please select an image first');
+            return;
+        }
+
+        cropper.getCroppedCanvas({
+            width: 800,
+            height: 800,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        }).toBlob(function(blob) {
+            const croppedFile = new File([blob], 'cropped_image.jpg', {
+                type: 'image/jpeg'
+            });
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(croppedFile);
+            
+            currentCropperContext.inputElement.files = dataTransfer.files;
+
+            const previewContainer = currentCropperContext.type === 'main'
+                ? mainPreviewContainer
+                : document.getElementById(`additionalImagePreviewContainer${currentCropperContext.index}`);
+            
+            const previewImg = previewContainer.querySelector('.img-preview');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.style.backgroundImage = `url('${e.target.result}')`;
+            };
+            reader.readAsDataURL(croppedFile);
+
+            const modal = bootstrap.Modal.getInstance(cropperModal);
+            modal.hide();
+        }, 'image/jpeg');
+    });
+
+
+    // Previous variant management code remains the same
+    // Variant Management
     const variantsContainer = document.getElementById('variantsContainer');
     const addVariantBtn = document.getElementById('addVariant');
+    const deletedVariantsInput = document.createElement('input');
+    deletedVariantsInput.type = 'hidden';
+    deletedVariantsInput.name = 'deleted_variants';
+    deletedVariantsInput.value = '';
+    document.querySelector('form').appendChild(deletedVariantsInput);
+
+    // Track deleted variant IDs
+    const deletedVariantIds = new Set();
 
     addVariantBtn.addEventListener('click', function() {
         const variantHTML = `
             <div class="variant-item border rounded p-3 mb-3">
+                <input type="hidden" name="variant_id[]" value="new">
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Size</label>
-                        <select class="form-select" name="varient_size[]">
+                        <select class="form-select" name="variant_size[]">
                             <option value="S">Small</option>
                             <option value="M">Medium</option>
                             <option value="L">Large</option>
@@ -172,11 +489,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Price</label>
-                        <input type="number" class="form-control" name="varient_price[]" required>
+                        <input type="number" class="form-control" name="variant_price[]" required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Stock</label>
-                        <input type="number" class="form-control" name="varient_stock[]" required>
+                        <input type="number" class="form-control" name="variant_stock[]" required>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label">&nbsp;</label>
@@ -190,13 +507,33 @@ document.addEventListener('DOMContentLoaded', function() {
         variantsContainer.insertAdjacentHTML('beforeend', variantHTML);
     });
 
-    // Event delegation for remove buttons
+    // Handle variant removal
     variantsContainer.addEventListener('click', function(e) {
         if (e.target.closest('.remove-variant')) {
-            e.target.closest('.variant-item').remove();
+            const variantItem = e.target.closest('.variant-item');
+            const variantIdInput = variantItem.querySelector('input[name="variant_id[]"]');
+            
+            // If this is an existing variant (has an ID), track it for deletion
+            if (variantIdInput && variantIdInput.value !== 'new') {
+                deletedVariantIds.add(variantIdInput.value);
+                deletedVariantsInput.value = Array.from(deletedVariantIds).join(',');
+            }
+            
+            variantItem.remove();
         }
     });
+
+    // // Form submit handler to validate variants
+    // document.querySelector('form').addEventListener('submit', function(e) {
+    //     const variants = variantsContainer.querySelectorAll('.variant-item');
+    //     if (variants.length === 0) {
+    //         e.preventDefault();
+    //         alert('At least one variant is required');
+    //         return false;
+    //     }
+    // });
 });
 </script>
+
 {% endblock %}
 {% endblock %}

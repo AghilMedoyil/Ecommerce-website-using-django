@@ -79,7 +79,7 @@ class product(models.Model):
     
     
 class multiimage(models.Model):
-    product=models.ForeignKey(product,on_delete=models.CASCADE)
+    product=models.ForeignKey(product,on_delete=models.CASCADE,related_name='additional_images')
     img=models.ImageField(upload_to='images/')
 
     

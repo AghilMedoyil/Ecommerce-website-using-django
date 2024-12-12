@@ -140,6 +140,9 @@ def add_product(request):
 def update_product(request,id):
     Product=get_object_or_404(product,id=id)
     product_varient=ProductVarient.objects.filter(products=Product)
+    categories=Category.objects.all()
+    brand=Brand.objects.all()
+    messages.get_messages(request).used = True
 
     if request.method == 'POST':
         title=request.POST.get('title')
@@ -171,29 +174,62 @@ def update_product(request,id):
                 multi_image =multiimage(product=Product, img=img)  # 'img' is the field in MultiImage
                 multi_image.save()  # Save the MultiImage instance
         
-        sizes = request.POST.getlist('varient_size[]')
-        prices = request.POST.getlist('varient_price[]')
-        stocks = request.POST.getlist('varient_stock[]')
-
-        print(f"SIZES: {sizes}, PRICES: {prices}, STOCKS: {stocks}")  # Debugging output
-        if sizes:
-            # Delete old variants before adding new ones
-            ProductVarient.objects.filter(products=Product).delete()
-        
-        for size, price, stock in zip(sizes, prices, stocks):
-            product_varient = ProductVarient(
-            products=Product,  # Assigning an actual Product instance
-            size=size,
-            price=price,
-            stock=stock,
+        variant_sizes = request.POST.getlist('varient_size[]')
+        variant_prices = request.POST.getlist('varient_price[]')
+        variant_stocks = request.POST.getlist('varient_stock[]')
+                        # Check for duplicate sizes
+        if len(variant_sizes) != len(set(variant_sizes)):
+            messages.error(request, 'Duplicate variant sizes are not allowed')
             
-            )
-            product_varient.save()
-          # Save each new variant
+            return render(request,'admin/edit_product.html',{'product':Product,'varient':product_varient,'categories':categories,'brands':brand})
+
+        # Validate at least one variant exists
+        if not variant_sizes:
+            messages.error(request, 'At least one variant is required')
+            return render(request,'admin/edit_product.html',{'product':Product,'varient':product_varient,'categories':categories,'brands':brand})
+
+        # Delete existing variants that were marked for deletion
+        deleted_variants = request.POST.get('deleted_variants', '').split(',')
+        if deleted_variants[0]:  # Check if there are any deleted variants
+            ProductVarient.objects.filter(
+                id__in=deleted_variants,
+                product=product
+            ).delete()
+
+        # Update or create variants
+        existing_variants = list(Product.varients.all())
+        for i, (size, price, stock) in enumerate(zip(variant_sizes, variant_prices, variant_stocks)):
+        
+            price = float(price)
+            stock = int(stock)
+            
+            if price <= 0:
+                messages.error(request, f'Invalid price for size {size}')
+                return render(request,'admin/edit_product.html',{'product':Product,'varient':product_varient,'categories':categories,'brands':brand})
+            
+            if stock < 0:
+                messages.error(request, f'Invalid stock quantity for size {size}')
+                return render(request,'admin/edit_product.html',{'product':Product,'varient':product_varient,'categories':categories,'brands':brand})
+
+            # Update existing variant or create new one
+            if i < len(existing_variants):
+                variant = existing_variants[i]
+                variant.size = size
+                variant.price = price
+                variant.stock = stock
+                variant.save()
+            else:
+                ProductVarient.objects.create(
+                    products=Product,
+                    size=size,
+                    price=price,
+                    stock=stock
+                )
+
+        
 
         return redirect('product_list')
-    categories=Category.objects.all()
-    brand=Brand.objects.all()
+    
     
     return render(request,'admin/edit_product.html',{'product':Product,'varient':product_varient,'categories':categories,'brands':brand})
 
